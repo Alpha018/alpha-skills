@@ -8,8 +8,8 @@
     },
     {
       "title": "Local",
-      "description": "Skills for self-hosted homelab infrastructure.",
-      "skills": []
+      "description": "Skills for self-hosted homelab infrastructure and local developer workflows.",
+      "skills": ["progressive-search"]
     },
     {
       "title": "General",
