@@ -14,3 +14,4 @@ node_modules/
 AGENTS.md
 CLAUDE.md
 skills-lock.json
+.mcp.json
