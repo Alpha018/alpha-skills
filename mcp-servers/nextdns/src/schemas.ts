@@ -48,7 +48,8 @@ export const SettingsSchema = z.object({
     .object({
       drop: z.object({ domain: z.boolean().optional(), ip: z.boolean().optional() }).optional(),
       enabled: z.boolean().optional(),
-      location: z.enum(['us', 'eu']).optional(),
+      // the live API accepts more regions than the bundled OpenAPI reference documents (e.g. "ch")
+      location: z.string().optional(),
       retention: z.number().optional(),
     })
     .optional(),

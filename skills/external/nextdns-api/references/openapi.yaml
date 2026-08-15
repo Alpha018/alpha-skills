@@ -236,7 +236,7 @@ components:
                 ip: { type: boolean }
                 domain: { type: boolean }
             retention: { type: integer, description: "Seconds logs are kept, e.g. 7776000 = 90 days." }
-            location: { type: string, enum: [us, eu], description: Storage region. }
+            location: { type: string, description: "Storage region. NextDNS's docs list us/eu but the live API accepts more (e.g. ch observed) — do not treat as a closed enum." }
         blockPage:
           type: object
           properties:

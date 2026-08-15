@@ -204,7 +204,9 @@ once; each also has its own scoped endpoint.
   days).
 - `settings.logs.drop.ip` / `drop.domain` — anonymize by omitting client IP
   or domain from stored logs, for privacy-sensitive deployments.
-- `settings.logs.location` — storage region, `"us"` or `"eu"`.
+- `settings.logs.location` — storage region string. NextDNS's own docs only
+  list `"us"`/`"eu"`, but the live API accepts more (e.g. `"ch"` observed in
+  practice) — don't validate this as a strict two-value enum.
 - `settings.blockPage.enabled` — show a block page instead of NXDOMAIN.
 - `settings.performance.ecs` — EDNS Client Subnet (better CDN geo-routing,
   less client-IP privacy).
