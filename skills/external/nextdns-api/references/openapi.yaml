@@ -1,0 +1,1288 @@
+openapi: 3.0.3
+info:
+  title: NextDNS API
+  version: "1.0"
+  description: >
+    Unofficial OpenAPI 3.0 reference for the NextDNS API, hand-transcribed from
+    the official docs at https://nextdns.github.io/api/ (no machine-readable
+    spec is published upstream). Regenerate/diff this file against that page
+    when updating — see references/api-reference.md for the update procedure.
+    Examples below are ported verbatim from that page.
+  contact:
+    url: https://nextdns.github.io/api/
+externalDocs:
+  description: Official NextDNS API documentation (source of truth)
+  url: https://nextdns.github.io/api/
+servers:
+  - url: https://api.nextdns.io
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Profiles
+    description: Root profile object — create/read/update/delete.
+  - name: Security
+    description: Threat-detection toggles and blocked TLDs.
+  - name: Privacy
+    description: Tracker blocklists and native tracking blockers.
+  - name: Parental Control
+    description: Blocked services/categories and safe-search enforcement.
+  - name: Denylist
+    description: User-defined blocked domains.
+  - name: Allowlist
+    description: User-defined allowed domains.
+  - name: Settings
+    description: Logging, block page, performance, and web3 settings.
+  - name: Analytics
+    description: Aggregated query metrics by dimension, with optional time-series breakdown.
+  - name: Logs
+    description: Raw DNS query history — list, stream, download, clear.
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: Found at https://my.nextdns.io/account
+
+  parameters:
+    profileId:
+      name: profile
+      in: path
+      required: true
+      schema: { type: string }
+      description: Profile ID (e.g. `abc123`)
+    entryId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+    limit:
+      name: limit
+      in: query
+      schema: { type: integer }
+      description: Page size. Analytics default 10 (1-500). Logs default 100 (10-1000).
+    cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+      description: Pagination cursor from a previous response's meta.pagination.cursor.
+    from:
+      name: from
+      in: query
+      schema: { type: string }
+      description: >
+        Inclusive lower-bound date filter. Accepts ISO 8601, Unix seconds/ms,
+        relative offsets (`-6h`, `-1d`, `-3M`, `now`), or `YYYY-MM-DD`.
+    to:
+      name: to
+      in: query
+      schema: { type: string }
+      description: Exclusive upper-bound date filter. Same formats as `from`.
+    device:
+      name: device
+      in: query
+      schema: { type: string }
+      description: Filter by device ID, or the literal `__UNIDENTIFIED__`.
+    seriesInterval:
+      name: interval
+      in: query
+      schema: { type: string }
+      description: "Time-series only (path suffixed `;series`). Tumbling window duration in seconds or duration string."
+    seriesAlignment:
+      name: alignment
+      in: query
+      schema: { type: string, enum: [start, end, clock], default: end }
+    seriesTimezone:
+      name: timezone
+      in: query
+      schema: { type: string, default: GMT }
+      description: IANA timezone name (e.g. Europe/Paris).
+    seriesPartials:
+      name: partials
+      in: query
+      schema: { type: string, enum: [none, start, end, all], default: none }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string, example: invalid }
+              detail: { type: string }
+              source:
+                type: object
+                properties:
+                  parameter: { type: string }
+
+    DataEnvelope:
+      type: object
+      properties:
+        data: {}
+        meta:
+          type: object
+          properties:
+            pagination:
+              type: object
+              properties:
+                cursor: { type: string, nullable: true }
+            stream:
+              type: object
+              properties:
+                id: { type: string }
+            series:
+              type: object
+              properties:
+                times: { type: array, items: { type: string, format: date-time } }
+                interval: { type: integer }
+
+    ListItemRef:
+      type: object
+      description: Generic {id[, active]} reference used by tlds, blocklists, natives, services, categories, denylist, allowlist.
+      properties:
+        id: { type: string }
+        active: { type: boolean }
+
+    Profile:
+      type: object
+      properties:
+        id: { type: string, readOnly: true }
+        name: { type: string }
+        security: { $ref: '#/components/schemas/SecuritySettings' }
+        privacy: { $ref: '#/components/schemas/PrivacySettings' }
+        parentalControl: { $ref: '#/components/schemas/ParentalControlSettings' }
+        denylist:
+          type: array
+          items: { $ref: '#/components/schemas/ListItemRef' }
+        allowlist:
+          type: array
+          items: { $ref: '#/components/schemas/ListItemRef' }
+        settings: { $ref: '#/components/schemas/Settings' }
+
+    SecuritySettings:
+      type: object
+      description: >
+        All boolean fields toggle a threat-detection category. NRD = newly
+        registered domains, DGA = domain generation algorithms, DDNS =
+        dynamic DNS, CSAM = child sexual abuse material blocklist.
+      properties:
+        threatIntelligenceFeeds: { type: boolean }
+        aiThreatDetection: { type: boolean }
+        googleSafeBrowsing: { type: boolean }
+        cryptojacking: { type: boolean }
+        dnsRebinding: { type: boolean }
+        idnHomographs: { type: boolean }
+        typosquatting: { type: boolean }
+        dga: { type: boolean }
+        nrd: { type: boolean }
+        ddns: { type: boolean }
+        parking: { type: boolean }
+        csam: { type: boolean }
+        tlds:
+          type: array
+          items: { $ref: '#/components/schemas/ListItemRef' }
+
+    PrivacySettings:
+      type: object
+      properties:
+        blocklists:
+          type: array
+          description: Third-party/curated tracker+ad blocklists by ID (e.g. `nextdns-recommended`, `oisd`).
+          items: { $ref: '#/components/schemas/ListItemRef' }
+        natives:
+          type: array
+          description: OS/vendor-native telemetry blockers by ID (e.g. `apple`, `huawei`, `samsung`, `windows`, `roku`).
+          items: { $ref: '#/components/schemas/ListItemRef' }
+        disguisedTrackers:
+          type: boolean
+          description: Block trackers that disguise themselves as first-party via CNAME cloaking.
+        allowAffiliate:
+          type: boolean
+          description: Allow affiliate/tracking links to resolve normally.
+
+    ParentalControlSettings:
+      type: object
+      properties:
+        services:
+          type: array
+          description: Named apps/platforms to block (e.g. `tiktok`, `facebook`, `netflix`).
+          items: { $ref: '#/components/schemas/ListItemRef' }
+        categories:
+          type: array
+          description: Content categories to block (e.g. `porn`, `social-networks`, `gambling`).
+          items: { $ref: '#/components/schemas/ListItemRef' }
+        safeSearch: { type: boolean }
+        youtubeRestrictedMode: { type: boolean }
+        blockBypass:
+          type: boolean
+          description: Prevent bypassing blocks via known bypass techniques (e.g. DNS-over-HTTPS to a different resolver).
+
+    Settings:
+      type: object
+      properties:
+        logs:
+          type: object
+          properties:
+            enabled: { type: boolean }
+            drop:
+              type: object
+              description: Anonymize stored logs by omitting client IP and/or domain.
+              properties:
+                ip: { type: boolean }
+                domain: { type: boolean }
+            retention: { type: integer, description: "Seconds logs are kept, e.g. 7776000 = 90 days." }
+            location: { type: string, enum: [us, eu], description: Storage region. }
+        blockPage:
+          type: object
+          properties:
+            enabled: { type: boolean, description: Show a block page instead of NXDOMAIN. }
+        performance:
+          type: object
+          properties:
+            ecs: { type: boolean, description: "EDNS Client Subnet: better CDN geo-routing, less client-IP privacy." }
+            cacheBoost: { type: boolean, description: Pre-warm/extend DNS cache. }
+            cnameFlattening: { type: boolean, description: Resolve CNAME chains server-side. }
+        web3: { type: boolean, description: "Resolve blockchain-based domains (ENS, etc)." }
+
+    LogEntry:
+      type: object
+      properties:
+        timestamp: { type: string, format: date-time }
+        domain: { type: string }
+        root: { type: string }
+        tracker: { type: string }
+        encrypted: { type: boolean }
+        protocol: { type: string, example: DNS-over-HTTPS }
+        clientIp: { type: string }
+        client: { type: string }
+        device:
+          type: object
+          properties:
+            id: { type: string }
+            name: { type: string }
+            model: { type: string }
+        status: { type: string, enum: [default, error, blocked, allowed] }
+        reasons:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              name: { type: string }
+
+    AnalyticsStatusRow:
+      type: object
+      properties:
+        status: { type: string, enum: [default, blocked, allowed] }
+        queries: { type: integer }
+
+    AnalyticsDomainRow:
+      type: object
+      properties:
+        domain: { type: string }
+        root: { type: string }
+        queries: { type: integer }
+
+    AnalyticsReasonRow:
+      type: object
+      properties:
+        id: { type: string, example: "blocklist:nextdns-recommended" }
+        name: { type: string }
+        queries: { type: integer }
+
+    AnalyticsIpRow:
+      type: object
+      properties:
+        ip: { type: string }
+        network:
+          type: object
+          properties:
+            cellular: { type: boolean }
+            vpn: { type: boolean }
+            isp: { type: string }
+            asn: { type: integer }
+        geo:
+          type: object
+          properties:
+            latitude: { type: number }
+            longitude: { type: number }
+            countryCode: { type: string }
+            country: { type: string }
+            city: { type: string }
+        queries: { type: integer }
+
+    AnalyticsDeviceRow:
+      type: object
+      properties:
+        id: { type: string, description: "Device ID, or `__UNIDENTIFIED__` for unidentified traffic." }
+        name: { type: string }
+        model: { type: string }
+        localIp: { type: string }
+        queries: { type: integer }
+
+    AnalyticsProtocolRow:
+      type: object
+      properties:
+        protocol: { type: string, example: DNS-over-HTTPS }
+        queries: { type: integer }
+
+    AnalyticsQueryTypeRow:
+      type: object
+      properties:
+        type: { type: integer, description: DNS resource record type number. }
+        name: { type: string, example: AAAA }
+        queries: { type: integer }
+
+    AnalyticsIpVersionRow:
+      type: object
+      properties:
+        version: { type: integer, enum: [4, 6] }
+        queries: { type: integer }
+
+    AnalyticsDnssecRow:
+      type: object
+      properties:
+        validated: { type: boolean }
+        queries: { type: integer }
+
+    AnalyticsEncryptionRow:
+      type: object
+      properties:
+        encrypted: { type: boolean }
+        queries: { type: integer }
+
+    AnalyticsDestinationCountryRow:
+      type: object
+      properties:
+        code: { type: string, example: US }
+        domains: { type: array, items: { type: string } }
+        queries: { type: integer }
+
+    AnalyticsDestinationGafamRow:
+      type: object
+      properties:
+        company: { type: string, example: apple }
+        queries: { type: integer }
+
+  examples:
+    CreateProfileResponse:
+      value: { data: { id: abc123 } }
+
+    SecuritySettingsExample:
+      value:
+        data:
+          threatIntelligenceFeeds: true
+          aiThreatDetection: true
+          googleSafeBrowsing: true
+          cryptojacking: true
+          dnsRebinding: true
+          idnHomographs: true
+          typosquatting: true
+          dga: true
+          nrd: true
+          ddns: true
+          parking: true
+          csam: true
+          tlds: [{ id: ru }, { id: cn }, { id: cf }]
+
+    PrivacySettingsExample:
+      value:
+        data:
+          blocklists: [{ id: nextdns-recommended }, { id: oisd }]
+          natives: [{ id: huawei }, { id: samsung }]
+          disguisedTrackers: true
+          allowAffiliate: false
+
+    ParentalControlExample:
+      value:
+        data:
+          services: [{ id: tiktok, active: true }]
+          categories: [{ id: porn, active: true }]
+          safeSearch: true
+          youtubeRestrictedMode: true
+          blockBypass: false
+
+    DenylistExample:
+      value:
+        data:
+          - { id: badwebsite.com, active: true }
+          - { id: pornhub.com, active: false }
+
+    AllowlistExample:
+      value:
+        data:
+          - { id: goodwebsite.com, active: true }
+          - { id: nytimes.com, active: false }
+
+    SettingsExample:
+      value:
+        data:
+          logs: { enabled: true, drop: { ip: false, domain: false }, retention: 7776000, location: eu }
+          blockPage: { enabled: true }
+          performance: { ecs: true, cacheBoost: false, cnameFlattening: true }
+          web3: false
+
+    AnalyticsStatusExample:
+      value:
+        data:
+          - { status: default, queries: 819491 }
+          - { status: blocked, queries: 132513 }
+          - { status: allowed, queries: 6923 }
+
+    AnalyticsDomainsExample:
+      value:
+        data:
+          - { domain: app-measurement.com, queries: 29801 }
+          - { domain: gateway.icloud.com, root: icloud.com, queries: 18468 }
+
+    AnalyticsReasonsExample:
+      value:
+        data:
+          - { id: "blocklist:nextdns-recommended", name: "NextDNS Ads & Trackers Blocklist", queries: 131833 }
+          - { id: "native:apple", name: "Native Tracking (Apple)", queries: 402 }
+
+    AnalyticsIpsExample:
+      value:
+        data:
+          - ip: 91.171.12.34
+            network: { cellular: false, vpn: false, isp: Free, asn: 12322 }
+            geo: { latitude: 48.8998, longitude: 2.703, countryCode: FR, country: France, city: Gagny }
+            queries: 136935
+
+    AnalyticsDevicesExample:
+      value:
+        data:
+          - { id: 8TD1G, name: "Romain's iPhone", model: "iPhone 12 Pro Max", queries: 489885 }
+          - { id: E24AR, name: MBP, model: "Macbook Pro", localIp: 192.168.0.11, queries: 215663 }
+          - { id: "__UNIDENTIFIED__", queries: 74242 }
+
+    AnalyticsProtocolsExample:
+      value:
+        data:
+          - { protocol: DNS-over-HTTPS, queries: 958757 }
+          - { protocol: DNS-over-TLS, queries: 39582 }
+          - { protocol: UDP, queries: 2334 }
+
+    AnalyticsQueryTypesExample:
+      value:
+        data:
+          - { type: 28, name: AAAA, queries: 356230 }
+          - { type: 1, name: A, queries: 341812 }
+          - { type: 65, name: HTTPS, queries: 260478 }
+
+    AnalyticsIpVersionsExample:
+      value:
+        data:
+          - { version: 6, queries: 784154 }
+          - { version: 4, queries: 174308 }
+
+    AnalyticsDnssecExample:
+      value:
+        data:
+          - { validated: false, queries: 817664 }
+          - { validated: true, queries: 8199 }
+
+    AnalyticsEncryptionExample:
+      value:
+        data:
+          - { encrypted: true, queries: 958331 }
+          - { encrypted: false, queries: 1 }
+
+    AnalyticsDestinationsCountriesExample:
+      value:
+        data:
+          - { code: US, domains: [app.smartmailcloud.com, imap.gmail.com], queries: 209851 }
+          - { code: FR, domains: [inappcheck.itunes.apple.com], queries: 105497 }
+
+    AnalyticsDestinationsGafamExample:
+      value:
+        data:
+          - { company: others, queries: 478732 }
+          - { company: apple, queries: 284832 }
+          - { company: google, queries: 159488 }
+
+    TimeSeriesExample:
+      summary: Any analytics path suffixed `;series` (e.g. `analytics/queryTypes;series`)
+      value:
+        data:
+          - { type: 28, name: AAAA, queries: [4019, 5801, 2667, 2817, 3314, 3128, 3810] }
+        meta:
+          series:
+            times: ["2021-03-08T16:51:36.623Z", "2021-03-09T16:51:36.623Z"]
+            interval: 86400
+          pagination: { cursor: jS8sl16m }
+
+    LogsListExample:
+      value:
+        data:
+          - timestamp: "2021-03-18T03:00:10.338Z"
+            domain: 21-courier.push.apple.com
+            root: apple.com
+            tracker: apple
+            encrypted: true
+            protocol: DNS-over-HTTPS
+            clientIp: "2a01:e0a:2cd:87a0:1b23:2832:57cd:aa1d"
+            client: apple-profile
+            device: { id: 8TD1G, name: "Romain's iPhone", model: "iPhone 12 Pro Max" }
+            status: default
+            reasons: []
+          - timestamp: "2021-03-18T02:56:14.182Z"
+            domain: sb.scorecardresearch.com
+            root: scorecardresearch.com
+            tracker: scorecard_research_beacon
+            encrypted: false
+            protocol: UDP
+            clientIp: 91.172.51.28
+            status: blocked
+            reasons:
+              - { id: "blocklist:nextdns-recommended", name: "NextDNS Ads & Trackers Blocklist" }
+              - { id: "blocklist:oisd", name: oisd }
+        meta:
+          stream: { id: 64v32d9r6rwkcctg6cu38e9g60 }
+          pagination: { cursor: null }
+
+    LogsDownloadUrlExample:
+      summary: Response when `redirect=false` — otherwise this is a 302 to the file itself
+      value: { data: { url: "https://..." } }
+
+    ErrorExample:
+      value:
+        errors:
+          - code: invalid
+            detail: "..."
+            source: { parameter: "..." }
+
+paths:
+  /profiles:
+    post:
+      tags: [Profiles]
+      summary: Create profile
+      operationId: createProfile
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Profile' }
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties: { id: { type: string } }
+              examples:
+                default: { $ref: '#/components/examples/CreateProfileResponse' }
+
+  /profiles/{profile}:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get:
+      tags: [Profiles]
+      summary: Get profile
+      description: Returns the complete profile with all nested settings.
+      operationId: getProfile
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { $ref: '#/components/schemas/Profile' } }
+    patch:
+      tags: [Profiles]
+      summary: Update profile (partial)
+      description: Only send the fields to change. Prefer a scoped sub-resource endpoint when only one area is changing.
+      operationId: updateProfile
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Profile' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { $ref: '#/components/schemas/Profile' } }
+    delete:
+      tags: [Profiles]
+      summary: Delete profile (also clears its logs)
+      operationId: deleteProfile
+      responses:
+        '200': { description: OK }
+
+  # ---- Sub-resource CRUD blocks: security/privacy/parentalControl settings ----
+  /profiles/{profile}/security:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get:
+      tags: [Security]
+      summary: Get security settings
+      operationId: getSecurity
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { $ref: '#/components/schemas/SecuritySettings' } }
+              examples:
+                default: { $ref: '#/components/examples/SecuritySettingsExample' }
+    patch:
+      tags: [Security]
+      summary: Update security settings
+      operationId: updateSecurity
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SecuritySettings' }
+      responses:
+        '200': { description: OK }
+
+  /profiles/{profile}/security/tlds:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get: { tags: [Security], summary: List blocked TLDs, operationId: listSecurityTlds, responses: { '200': { description: OK } } }
+    post:
+      tags: [Security]
+      summary: Add blocked TLD
+      operationId: addSecurityTld
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ListItemRef' }
+            example: { id: ru }
+      responses: { '200': { description: OK } }
+  /profiles/{profile}/security/tlds/{id}:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/entryId' }]
+    patch: { tags: [Security], summary: Update TLD entry, operationId: updateSecurityTld, responses: { '200': { description: OK } } }
+    delete: { tags: [Security], summary: Remove TLD entry, operationId: deleteSecurityTld, responses: { '200': { description: OK } } }
+
+  /profiles/{profile}/privacy:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get:
+      tags: [Privacy]
+      summary: Get privacy settings
+      operationId: getPrivacy
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { $ref: '#/components/schemas/PrivacySettings' } }
+              examples:
+                default: { $ref: '#/components/examples/PrivacySettingsExample' }
+    patch:
+      tags: [Privacy]
+      summary: Update privacy settings
+      operationId: updatePrivacy
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PrivacySettings' }
+      responses:
+        '200': { description: OK }
+
+  /profiles/{profile}/privacy/blocklists:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get: { tags: [Privacy], summary: List privacy blocklists, operationId: listPrivacyBlocklists, responses: { '200': { description: OK } } }
+    post:
+      tags: [Privacy]
+      summary: Add privacy blocklist
+      operationId: addPrivacyBlocklist
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ListItemRef' }
+            example: { id: oisd }
+      responses: { '200': { description: OK } }
+  /profiles/{profile}/privacy/blocklists/{id}:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/entryId' }]
+    patch: { tags: [Privacy], summary: Update blocklist entry, operationId: updatePrivacyBlocklist, responses: { '200': { description: OK } } }
+    delete: { tags: [Privacy], summary: Remove blocklist entry, operationId: deletePrivacyBlocklist, responses: { '200': { description: OK } } }
+
+  /profiles/{profile}/privacy/natives:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get: { tags: [Privacy], summary: List native tracking blockers, operationId: listPrivacyNatives, responses: { '200': { description: OK } } }
+    post:
+      tags: [Privacy]
+      summary: Add native tracking blocker
+      operationId: addPrivacyNative
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ListItemRef' }
+            example: { id: samsung }
+      responses: { '200': { description: OK } }
+  /profiles/{profile}/privacy/natives/{id}:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/entryId' }]
+    patch: { tags: [Privacy], summary: Update native entry, operationId: updatePrivacyNative, responses: { '200': { description: OK } } }
+    delete: { tags: [Privacy], summary: Remove native entry, operationId: deletePrivacyNative, responses: { '200': { description: OK } } }
+
+  /profiles/{profile}/parentalControl:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get:
+      tags: [Parental Control]
+      summary: Get parental control settings
+      operationId: getParentalControl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { $ref: '#/components/schemas/ParentalControlSettings' } }
+              examples:
+                default: { $ref: '#/components/examples/ParentalControlExample' }
+    patch:
+      tags: [Parental Control]
+      summary: Update parental control settings
+      operationId: updateParentalControl
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ParentalControlSettings' }
+      responses:
+        '200': { description: OK }
+
+  /profiles/{profile}/parentalControl/services:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get: { tags: [Parental Control], summary: List blocked services, operationId: listParentalServices, responses: { '200': { description: OK } } }
+    put:
+      tags: [Parental Control]
+      summary: Replace all blocked services
+      operationId: replaceParentalServices
+      requestBody:
+        content:
+          application/json:
+            schema: { type: array, items: { $ref: '#/components/schemas/ListItemRef' } }
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Parental Control]
+      summary: Add blocked service
+      operationId: addParentalService
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ListItemRef' }
+            example: { id: tiktok, active: true }
+      responses: { '200': { description: OK } }
+  /profiles/{profile}/parentalControl/services/{id}:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/entryId' }]
+    patch: { tags: [Parental Control], summary: Update service entry, operationId: updateParentalService, responses: { '200': { description: OK } } }
+    delete: { tags: [Parental Control], summary: Remove service entry, operationId: deleteParentalService, responses: { '200': { description: OK } } }
+
+  /profiles/{profile}/parentalControl/categories:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get: { tags: [Parental Control], summary: List blocked categories, operationId: listParentalCategories, responses: { '200': { description: OK } } }
+    put:
+      tags: [Parental Control]
+      summary: Replace all blocked categories
+      operationId: replaceParentalCategories
+      requestBody:
+        content:
+          application/json:
+            schema: { type: array, items: { $ref: '#/components/schemas/ListItemRef' } }
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Parental Control]
+      summary: Add blocked category
+      operationId: addParentalCategory
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ListItemRef' }
+            example: { id: porn, active: true }
+      responses: { '200': { description: OK } }
+  /profiles/{profile}/parentalControl/categories/{id}:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/entryId' }]
+    patch: { tags: [Parental Control], summary: Update category entry, operationId: updateParentalCategory, responses: { '200': { description: OK } } }
+    delete: { tags: [Parental Control], summary: Remove category entry, operationId: deleteParentalCategory, responses: { '200': { description: OK } } }
+
+  /profiles/{profile}/denylist:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get:
+      tags: [Denylist]
+      summary: List denylist entries
+      operationId: listDenylist
+      parameters:
+        - { $ref: '#/components/parameters/limit' }
+        - { $ref: '#/components/parameters/cursor' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              examples:
+                default: { $ref: '#/components/examples/DenylistExample' }
+    put:
+      tags: [Denylist]
+      summary: Replace entire denylist
+      operationId: replaceDenylist
+      requestBody:
+        content:
+          application/json:
+            schema: { type: array, items: { $ref: '#/components/schemas/ListItemRef' } }
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Denylist]
+      summary: Add domain to denylist
+      operationId: addDenylistEntry
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ListItemRef' }
+            example: { id: badwebsite.com, active: true }
+      responses: { '200': { description: OK } }
+    delete: { tags: [Denylist], summary: Clear entire denylist, operationId: clearDenylist, responses: { '200': { description: OK } } }
+  /profiles/{profile}/denylist/{id}:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/entryId' }]
+    patch: { tags: [Denylist], summary: Update denylist entry (e.g. toggle active), operationId: updateDenylistEntry, responses: { '200': { description: OK } } }
+    delete: { tags: [Denylist], summary: Remove denylist entry, operationId: deleteDenylistEntry, responses: { '200': { description: OK } } }
+
+  /profiles/{profile}/allowlist:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get:
+      tags: [Allowlist]
+      summary: List allowlist entries
+      operationId: listAllowlist
+      parameters:
+        - { $ref: '#/components/parameters/limit' }
+        - { $ref: '#/components/parameters/cursor' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              examples:
+                default: { $ref: '#/components/examples/AllowlistExample' }
+    put:
+      tags: [Allowlist]
+      summary: Replace entire allowlist
+      operationId: replaceAllowlist
+      requestBody:
+        content:
+          application/json:
+            schema: { type: array, items: { $ref: '#/components/schemas/ListItemRef' } }
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Allowlist]
+      summary: Add domain to allowlist
+      operationId: addAllowlistEntry
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ListItemRef' }
+            example: { id: goodwebsite.com, active: true }
+      responses: { '200': { description: OK } }
+    delete: { tags: [Allowlist], summary: Clear entire allowlist, operationId: clearAllowlist, responses: { '200': { description: OK } } }
+  /profiles/{profile}/allowlist/{id}:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/entryId' }]
+    patch: { tags: [Allowlist], summary: Update allowlist entry, operationId: updateAllowlistEntry, responses: { '200': { description: OK } } }
+    delete: { tags: [Allowlist], summary: Remove allowlist entry, operationId: deleteAllowlistEntry, responses: { '200': { description: OK } } }
+
+  /profiles/{profile}/settings:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get:
+      tags: [Settings]
+      summary: Get all settings
+      operationId: getSettings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { $ref: '#/components/schemas/Settings' } }
+              examples:
+                default: { $ref: '#/components/examples/SettingsExample' }
+    patch:
+      tags: [Settings]
+      summary: Update settings (partial)
+      operationId: updateSettings
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Settings' }
+      responses:
+        '200': { description: OK }
+
+  /profiles/{profile}/settings/logs:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get: { tags: [Settings], summary: "Get logs settings (retention, drop, location)", operationId: getLogsSettings, responses: { '200': { description: OK } } }
+    patch: { tags: [Settings], summary: Update logs settings, operationId: updateLogsSettings, responses: { '200': { description: OK } } }
+
+  /profiles/{profile}/settings/blockPage:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get: { tags: [Settings], summary: Get block page settings, operationId: getBlockPageSettings, responses: { '200': { description: OK } } }
+    patch: { tags: [Settings], summary: Update block page settings, operationId: updateBlockPageSettings, responses: { '200': { description: OK } } }
+
+  /profiles/{profile}/settings/performance:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get: { tags: [Settings], summary: "Get performance settings (ECS, cache boost, CNAME flattening)", operationId: getPerformanceSettings, responses: { '200': { description: OK } } }
+    patch: { tags: [Settings], summary: Update performance settings, operationId: updatePerformanceSettings, responses: { '200': { description: OK } } }
+
+  /profiles/{profile}/settings/web3:
+    parameters: [{ $ref: '#/components/parameters/profileId' }]
+    get: { tags: [Settings], summary: Get web3 setting, operationId: getWeb3Setting, responses: { '200': { description: OK } } }
+    patch: { tags: [Settings], summary: Update web3 setting, operationId: updateWeb3Setting, responses: { '200': { description: OK } } }
+
+  # ---- Analytics (each also supports a `;series` path suffix for time-series — see below and api-reference.md) ----
+  /profiles/{profile}/analytics/status:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/from' }, { $ref: '#/components/parameters/to' }, { $ref: '#/components/parameters/limit' }, { $ref: '#/components/parameters/cursor' }, { $ref: '#/components/parameters/device' }]
+    get:
+      tags: [Analytics]
+      summary: Query counts by status (default/blocked/allowed)
+      operationId: getAnalyticsStatus
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { type: array, items: { $ref: '#/components/schemas/AnalyticsStatusRow' } } }
+              examples:
+                default: { $ref: '#/components/examples/AnalyticsStatusExample' }
+
+  /profiles/{profile}/analytics/domains:
+    parameters:
+      - { $ref: '#/components/parameters/profileId' }
+      - { $ref: '#/components/parameters/from' }
+      - { $ref: '#/components/parameters/to' }
+      - { $ref: '#/components/parameters/limit' }
+      - { $ref: '#/components/parameters/cursor' }
+      - { $ref: '#/components/parameters/device' }
+      - name: status
+        in: query
+        schema: { type: string, enum: [default, blocked, allowed] }
+      - name: root
+        in: query
+        schema: { type: boolean, default: false }
+        description: Group by root domain instead of full hostname.
+    get:
+      tags: [Analytics]
+      summary: Top queried domains
+      operationId: getAnalyticsDomains
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { type: array, items: { $ref: '#/components/schemas/AnalyticsDomainRow' } } }
+              examples:
+                default: { $ref: '#/components/examples/AnalyticsDomainsExample' }
+
+  /profiles/{profile}/analytics/reasons:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/from' }, { $ref: '#/components/parameters/to' }, { $ref: '#/components/parameters/limit' }, { $ref: '#/components/parameters/cursor' }, { $ref: '#/components/parameters/device' }]
+    get:
+      tags: [Analytics]
+      summary: Top block/allow reasons (blocklist/native/etc)
+      operationId: getAnalyticsReasons
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { type: array, items: { $ref: '#/components/schemas/AnalyticsReasonRow' } } }
+              examples:
+                default: { $ref: '#/components/examples/AnalyticsReasonsExample' }
+
+  /profiles/{profile}/analytics/ips:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/from' }, { $ref: '#/components/parameters/to' }, { $ref: '#/components/parameters/limit' }, { $ref: '#/components/parameters/cursor' }, { $ref: '#/components/parameters/device' }]
+    get:
+      tags: [Analytics]
+      summary: Top client IPs with geo/network enrichment
+      operationId: getAnalyticsIps
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { type: array, items: { $ref: '#/components/schemas/AnalyticsIpRow' } } }
+              examples:
+                default: { $ref: '#/components/examples/AnalyticsIpsExample' }
+
+  /profiles/{profile}/analytics/devices:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/from' }, { $ref: '#/components/parameters/to' }, { $ref: '#/components/parameters/limit' }, { $ref: '#/components/parameters/cursor' }]
+    get:
+      tags: [Analytics]
+      summary: Query counts by device
+      operationId: getAnalyticsDevices
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { type: array, items: { $ref: '#/components/schemas/AnalyticsDeviceRow' } } }
+              examples:
+                default: { $ref: '#/components/examples/AnalyticsDevicesExample' }
+
+  /profiles/{profile}/analytics/protocols:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/from' }, { $ref: '#/components/parameters/to' }, { $ref: '#/components/parameters/device' }]
+    get:
+      tags: [Analytics]
+      summary: Query counts by transport protocol
+      operationId: getAnalyticsProtocols
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { type: array, items: { $ref: '#/components/schemas/AnalyticsProtocolRow' } } }
+              examples:
+                default: { $ref: '#/components/examples/AnalyticsProtocolsExample' }
+
+  /profiles/{profile}/analytics/queryTypes:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/from' }, { $ref: '#/components/parameters/to' }, { $ref: '#/components/parameters/device' }]
+    get:
+      tags: [Analytics]
+      summary: Query counts by DNS record type
+      operationId: getAnalyticsQueryTypes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { type: array, items: { $ref: '#/components/schemas/AnalyticsQueryTypeRow' } } }
+              examples:
+                default: { $ref: '#/components/examples/AnalyticsQueryTypesExample' }
+
+  /profiles/{profile}/analytics/ipVersions:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/from' }, { $ref: '#/components/parameters/to' }, { $ref: '#/components/parameters/device' }]
+    get:
+      tags: [Analytics]
+      summary: Query counts by IP version
+      operationId: getAnalyticsIpVersions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { type: array, items: { $ref: '#/components/schemas/AnalyticsIpVersionRow' } } }
+              examples:
+                default: { $ref: '#/components/examples/AnalyticsIpVersionsExample' }
+
+  /profiles/{profile}/analytics/dnssec:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/from' }, { $ref: '#/components/parameters/to' }, { $ref: '#/components/parameters/device' }]
+    get:
+      tags: [Analytics]
+      summary: Query counts by DNSSEC validation
+      operationId: getAnalyticsDnssec
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { type: array, items: { $ref: '#/components/schemas/AnalyticsDnssecRow' } } }
+              examples:
+                default: { $ref: '#/components/examples/AnalyticsDnssecExample' }
+
+  /profiles/{profile}/analytics/encryption:
+    parameters: [{ $ref: '#/components/parameters/profileId' }, { $ref: '#/components/parameters/from' }, { $ref: '#/components/parameters/to' }, { $ref: '#/components/parameters/device' }]
+    get:
+      tags: [Analytics]
+      summary: Query counts by encryption status
+      operationId: getAnalyticsEncryption
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { data: { type: array, items: { $ref: '#/components/schemas/AnalyticsEncryptionRow' } } }
+              examples:
+                default: { $ref: '#/components/examples/AnalyticsEncryptionExample' }
+
+  /profiles/{profile}/analytics/destinations:
+    parameters:
+      - { $ref: '#/components/parameters/profileId' }
+      - { $ref: '#/components/parameters/from' }
+      - { $ref: '#/components/parameters/to' }
+      - { $ref: '#/components/parameters/device' }
+      - name: type
+        in: query
+        required: true
+        schema: { type: string, enum: [countries, gafam] }
+    get:
+      tags: [Analytics]
+      summary: Query destinations grouped by country or GAFAM company
+      operationId: getAnalyticsDestinations
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: '#/components/schemas/AnalyticsDestinationCountryRow'
+                        - $ref: '#/components/schemas/AnalyticsDestinationGafamRow'
+              examples:
+                countries: { $ref: '#/components/examples/AnalyticsDestinationsCountriesExample' }
+                gafam: { $ref: '#/components/examples/AnalyticsDestinationsGafamExample' }
+
+  /profiles/{profile}/analytics/{dimension};series:
+    parameters:
+      - { $ref: '#/components/parameters/profileId' }
+      - name: dimension
+        in: path
+        required: true
+        schema: { type: string }
+        description: Any analytics dimension name (status, domains, reasons, ips, devices, protocols, queryTypes, ipVersions, dnssec, encryption, destinations).
+      - { $ref: '#/components/parameters/from' }
+      - { $ref: '#/components/parameters/to' }
+      - { $ref: '#/components/parameters/seriesInterval' }
+      - { $ref: '#/components/parameters/seriesAlignment' }
+      - { $ref: '#/components/parameters/seriesTimezone' }
+      - { $ref: '#/components/parameters/seriesPartials' }
+    get:
+      tags: [Analytics]
+      summary: Time-series variant of any analytics dimension
+      description: >
+        Append `;series` to any analytics path to get the dimension broken
+        into time buckets instead of one total. `data[].queries` becomes a
+        parallel array aligned to `meta.series.times`.
+      operationId: getAnalyticsSeries
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              examples:
+                default: { $ref: '#/components/examples/TimeSeriesExample' }
+
+  # ---- Logs ----
+  /profiles/{profile}/logs:
+    parameters:
+      - { $ref: '#/components/parameters/profileId' }
+      - { $ref: '#/components/parameters/from' }
+      - { $ref: '#/components/parameters/to' }
+      - name: sort
+        in: query
+        schema: { type: string, enum: [asc, desc], default: desc }
+      - { $ref: '#/components/parameters/limit' }
+      - { $ref: '#/components/parameters/cursor' }
+      - { $ref: '#/components/parameters/device' }
+      - name: status
+        in: query
+        schema: { type: string, enum: [default, error, blocked, allowed] }
+      - name: search
+        in: query
+        schema: { type: string }
+        description: Partial domain-name match.
+      - name: raw
+        in: query
+        schema: { type: boolean, default: false }
+        description: "`true` returns every DNS query; `false` returns deduplicated navigational queries only."
+    get:
+      tags: [Logs]
+      summary: List DNS query logs
+      operationId: listLogs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/DataEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/LogEntry' }
+              examples:
+                default: { $ref: '#/components/examples/LogsListExample' }
+    delete:
+      tags: [Logs]
+      summary: Clear all logs for the profile
+      operationId: clearLogs
+      responses: { '200': { description: OK } }
+
+  /profiles/{profile}/logs/stream:
+    parameters:
+      - { $ref: '#/components/parameters/profileId' }
+      - { $ref: '#/components/parameters/device' }
+      - name: status
+        in: query
+        schema: { type: string }
+      - name: search
+        in: query
+        schema: { type: string }
+      - name: raw
+        in: query
+        schema: { type: boolean, default: false }
+      - name: id
+        in: query
+        schema: { type: string }
+        description: Resume streaming from this event ID after a disconnect.
+    get:
+      tags: [Logs]
+      summary: Stream DNS query logs in real time (Server-Sent Events)
+      description: |
+        Does not support `from`/`to`/`sort`/`limit`/`cursor` — this is a live
+        tail, not a page. Standard SSE framing:
+
+        ```
+        id: 64v32d9r6rwkcctg6cu38e9g60
+        data: {"timestamp":"2021-03-16T04:40:30.344Z","domain":"g.whatsapp.net",...}
+        ```
+      operationId: streamLogs
+      responses:
+        '200':
+          description: text/event-stream of LogEntry objects, one per SSE `data:` line.
+          content:
+            text/event-stream: {}
+
+  /profiles/{profile}/logs/download:
+    parameters:
+      - { $ref: '#/components/parameters/profileId' }
+      - name: redirect
+        in: query
+        schema: { type: boolean, default: true }
+        description: "`true` (default) issues a 302 straight to the file; `false` returns JSON with the URL instead."
+    get:
+      tags: [Logs]
+      summary: Download logs as a file (redirects to a signed URL by default)
+      operationId: downloadLogs
+      responses:
+        '200':
+          description: "With redirect=false: JSON containing the file URL. Otherwise: HTTP 302 redirect."
+          content:
+            application/json:
+              examples:
+                default: { $ref: '#/components/examples/LogsDownloadUrlExample' }

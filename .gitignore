@@ -1,0 +1,14 @@
+.DS_Store
+*.log
+.env
+.env.*
+node_modules/
+.idea/
+.qmd/
+.codegraph/
+
+# AI agent scaffolding (not versioned for now)
+.claude/
+.agents/
+AGENTS.md
+CLAUDE.md
