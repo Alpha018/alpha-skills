@@ -31,7 +31,6 @@ jobs:
       - run: npm run build
       - run: npm test
 
-      # npmPublish is off in .releaserc.json; publish-nextdns-mcp.yml handles that.
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
