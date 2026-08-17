@@ -1,9 +1,9 @@
 name: Publish nextdns-mcp
 
 on:
-  push:
-    tags:
-      - "nextdns-mcp-v*"
+  workflow_run:
+    workflows: [Release nextdns-mcp]
+    types: [completed]
 
 permissions:
   contents: read
@@ -11,12 +11,15 @@ permissions:
 
 jobs:
   publish:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: mcp-servers/nextdns
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - uses: actions/setup-node@v4
         with:
@@ -26,6 +29,14 @@ jobs:
       - run: npm install -g npm@latest
 
       - run: npm ci
-      - run: npm run build
 
-      - run: npm publish --provenance
+      - id: version
+        run: |
+          echo "local=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "published=$(npm view @alpha018/nextdns-mcp version 2>/dev/null || echo none)" >> "$GITHUB_OUTPUT"
+
+      - if: steps.version.outputs.local != steps.version.outputs.published
+        run: npm run build
+
+      - if: steps.version.outputs.local != steps.version.outputs.published
+        run: npm publish --provenance
