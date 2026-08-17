@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alpha018/alpha-skills.git",
+    "url": "git+https://github.com/Alpha018/alpha-skills.git",
     "directory": "mcp-servers/nextdns"
   },
   "bin": {
