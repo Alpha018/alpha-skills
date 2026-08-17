@@ -1,0 +1,77 @@
+name: Build and publish MCP servers
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mcp-servers/**"
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.detect.outputs.packages }}
+      has_packages: ${{ steps.detect.outputs.has_packages }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: detect
+        run: |
+          base="${{ github.event.before }}"
+          if ! git cat-file -e "$base" 2>/dev/null; then
+            base="HEAD~1"
+          fi
+          changed=$(git diff --name-only "$base" "${{ github.sha }}" -- mcp-servers/ \
+            | awk -F/ '{ print $1"/"$2 }' \
+            | sort -u \
+            | while read -r dir; do [ -f "$dir/package.json" ] && echo "$dir"; done)
+          packages=$(printf '%s\n' "$changed" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "packages=$packages" >> "$GITHUB_OUTPUT"
+          echo "has_packages=$([ "$packages" != "[]" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: detect
+    if: needs.detect.outputs.has_packages == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.detect.outputs.packages) }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.package }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - run: npm install -g npm@latest
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test
+
+      - run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: version
+        run: |
+          name=$(node -p "require('./package.json').name")
+          echo "local=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "published=$(npm view "$name" version 2>/dev/null || echo none)" >> "$GITHUB_OUTPUT"
+
+      - if: steps.version.outputs.local != steps.version.outputs.published
+        run: npm publish --provenance
