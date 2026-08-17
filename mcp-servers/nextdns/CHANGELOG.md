@@ -1,3 +1,10 @@
+# [@alpha018/nextdns-mcp-v1.0.2](https://github.com/Alpha018/alpha-skills/compare/nextdns-mcp-v1.0.1...nextdns-mcp-v1.0.2) (2026-08-17)
+
+
+### Bug Fixes
+
+* **nextdns-mcp:** match repository.url casing to the actual GitHub owner ([abf80ea](https://github.com/Alpha018/alpha-skills/commit/abf80ea42a89903673c70330d7c1529e6fb35e83))
+
 # [@alpha018/nextdns-mcp-v1.0.1](https://github.com/alpha018/alpha-skills/compare/nextdns-mcp-v1.0.0...nextdns-mcp-v1.0.1) (2026-08-17)
 
 
