@@ -25,16 +25,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - run: npm ci
       - run: npm run build
       - run: npm test
 
-      # npmPublish is disabled in .releaserc.json: this job only bumps the
-      # version, writes the changelog, tags, and cuts the GitHub release.
-      # publish-nextdns-mcp.yml does the actual npm publish, triggered by
-      # the tag this step pushes.
+      # npmPublish is off in .releaserc.json; publish-nextdns-mcp.yml handles that.
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -20,18 +20,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
-      # Trusted publishing (OIDC) needs npm >= 11.5.1; setup-node's bundled
-      # npm can lag behind that.
+      # Trusted publishing needs npm >= 11.5.1, ahead of setup-node's bundled version.
       - run: npm install -g npm@latest
 
       - run: npm ci
       - run: npm run build
 
-      # No NPM_TOKEN: npm's CLI detects the GitHub Actions OIDC context
-      # (id-token: write above) and exchanges it for a short-lived publish
-      # token, provided this repo is linked as a Trusted Publisher on the
-      # @alpha018/nextdns-mcp package settings page on npmjs.com.
+      # No NPM_TOKEN: npm exchanges the OIDC token from id-token: write above.
       - run: npm publish --provenance
