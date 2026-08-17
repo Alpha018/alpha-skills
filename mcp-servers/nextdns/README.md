@@ -10,9 +10,11 @@ Local stdio MCP server exposing the NextDNS REST API as tools. Claude Code (or a
 
 | | |
 |---|---|
+| Package | [`@alpha018/nextdns-mcp`](https://www.npmjs.com/package/@alpha018/nextdns-mcp) on npm, run via `npx` |
 | Transport | stdio, launched as a subprocess |
 | Language | TypeScript |
 | Auth | `NEXTDNS_API_KEY` environment variable |
+| Versioning | [Semantic Versioning](https://semver.org) via [semantic-release](https://semantic-release.gitbook.io), driven by Conventional Commits |
 | Source of truth | [`skills/external/nextdns-api/references/api-reference.md`](../../skills/external/nextdns-api/references/api-reference.md) |
 
 Shapes are kept in sync with that reference doc in this repo. Check it if a tool call fails validation after NextDNS changes their API.
@@ -35,18 +37,12 @@ Not included (v1): `logs/stream` (Server-Sent Events, doesn't fit a request/resp
 ## Setup
 
 1. Get your NextDNS API key from https://my.nextdns.io/account.
-2. Build:
-   ```bash
-   cd mcp-servers/nextdns
-   npm install
-   npm run build
-   ```
-3. Register with Claude Code (project-scoped example):
+2. Register with Claude Code (runs the published package via `npx`, no clone or build needed):
 
    ```bash
    claude mcp add nextdns \
      --env NEXTDNS_API_KEY=your-api-key-here \
-     -- node "$(pwd)/dist/index.js"
+     -- npx -y @alpha018/nextdns-mcp
    ```
 
    Or add directly to `.mcp.json`:
@@ -55,8 +51,8 @@ Not included (v1): `logs/stream` (Server-Sent Events, doesn't fit a request/resp
    {
      "mcpServers": {
        "nextdns": {
-         "command": "node",
-         "args": ["/absolute/path/to/mcp-servers/nextdns/dist/index.js"],
+         "command": "npx",
+         "args": ["-y", "@alpha018/nextdns-mcp"],
          "env": { "NEXTDNS_API_KEY": "your-api-key-here" }
        }
      }
@@ -65,12 +61,22 @@ Not included (v1): `logs/stream` (Server-Sent Events, doesn't fit a request/resp
 
    Environment variables for local MCP servers are stored unencrypted in Claude's local config, readable only by your user account. Fine for a personal homelab key, but don't reuse a high-value secret here.
 
-4. Verify: run `/mcp` in Claude Code and confirm `nextdns` is listed, then try asking it to fetch a profile.
+3. Verify: run `/mcp` in Claude Code and confirm `nextdns` is listed, then try asking it to fetch a profile.
 
 ## Development
 
+Working against a local checkout instead of the published package:
+
 ```bash
+cd mcp-servers/nextdns
+npm install
 npm run dev          # run directly with tsx, no build step
 npm run typecheck    # tsc --noEmit
 npm run build        # compile to dist/
 ```
+
+## Releasing
+
+Every push to `main` that touches this directory triggers [`.github/workflows/release-nextdns-mcp.yml`](../../.github/workflows/release-nextdns-mcp.yml): it builds, tests, then runs [semantic-release](https://semantic-release.gitbook.io) (scoped to this package via `semantic-release-monorepo`, so commits touching other parts of the repo don't trigger a release). The version bump comes from the Conventional Commit types on the merged commits (`fix` → patch, `feat` → minor, `BREAKING CHANGE` → major), and a matching GitHub release and `CHANGELOG.md` entry are generated automatically. Nothing to run by hand.
+
+Publishing uses npm's [trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC), so there's no `NPM_TOKEN` secret to manage, but it does need a one-time setup on npmjs.com: on the `@alpha018/nextdns-mcp` package's Settings page, add a trusted publisher pointing at this repo and the `release-nextdns-mcp.yml` workflow.

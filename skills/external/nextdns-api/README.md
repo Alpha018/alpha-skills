@@ -39,7 +39,7 @@ curl -sH "X-Api-Key: $NEXTDNS_API_KEY" \
 
 ## A local MCP server built on this reference
 
-This repository also has [`mcp-servers/nextdns`](../../../mcp-servers/nextdns), a local MCP server that wraps the NextDNS API as MCP tools, using this skill's reference docs as its source of truth for request and response shapes. If you're building automation against NextDNS in an MCP-aware client rather than writing raw HTTP calls, that's the more direct route.
+This repository also has [`mcp-servers/nextdns`](../../../mcp-servers/nextdns), a local MCP server that wraps the NextDNS API as MCP tools, using this skill's reference docs as its source of truth for request and response shapes. It's published as [`@alpha018/nextdns-mcp`](https://www.npmjs.com/package/@alpha018/nextdns-mcp) and runs via `npx`, no clone required. If you're building automation against NextDNS in an MCP-aware client rather than writing raw HTTP calls, that's the more direct route.
 
 ## Keeping this current
 

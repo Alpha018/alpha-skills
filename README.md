@@ -11,7 +11,7 @@ A homelab skills repository with two purposes that stay strictly separate: a gro
 | Purpose | Location | What it is |
 |---|---|---|
 | Published skills | `skills/` | Agent Skills meant to be published to skills.sh, for anyone to install |
-| Local MCP servers | `mcp-servers/` | Local automation built on top of the published skills' reference docs |
+| MCP servers | `mcp-servers/` | stdio MCP servers built on top of the published skills' reference docs, published to npm for anyone to run via `npx` |
 
 ## Published skills
 
@@ -22,13 +22,13 @@ A homelab skills repository with two purposes that stay strictly separate: a gro
 
 Each skill is a folder with a required `SKILL.md` (frontmatter plus instructions) and, optionally, `references/`, `scripts/`, and `assets/`. A skill's real identity is the `name` field in its frontmatter, not its folder path, though the two are kept in sync here.
 
-## Local MCP servers
+## MCP servers
 
-| Server | Transport | Exposes |
-|---|---|---|
-| [`nextdns`](mcp-servers/nextdns) | stdio | Getting/updating a NextDNS profile's settings, managing list entries, pulling analytics, reading logs |
+| Server | Package | Transport | Exposes |
+|---|---|---|---|
+| [`nextdns`](mcp-servers/nextdns) | [`@alpha018/nextdns-mcp`](https://www.npmjs.com/package/@alpha018/nextdns-mcp) | stdio | Getting/updating a NextDNS profile's settings, managing list entries, pulling analytics, reading logs |
 
-`mcp-servers/nextdns` runs as a local subprocess, not a hosted service, and its request/response shapes are kept in sync with `skills/external/nextdns-api/references/api-reference.md`. See its own `README.md` for setup and the full tool list.
+Each server runs as a local subprocess via `npx`, not a hosted service, and its request/response shapes are kept in sync with the matching skill's reference docs (`skills/external/nextdns-api/references/api-reference.md` for `nextdns`). Versioning is automated: [semantic-release](https://semantic-release.gitbook.io) cuts a release and publishes to npm on every merge to `main` that touches the server's directory, based on its Conventional Commits. See each server's own `README.md` for setup and its full tool list.
 
 ## Repository structure
 
@@ -41,7 +41,9 @@ skills/
   general/        # cross-cutting utilities not tied to a specific service
 skills.sh.json    # groupings shown on the skills.sh listing page
 mcp-servers/
-  nextdns/        # local stdio MCP server built on the nextdns-api skill's reference docs
+  nextdns/        # stdio MCP server built on the nextdns-api skill's reference docs, published as @alpha018/nextdns-mcp
+.github/
+  workflows/      # semantic-release CI, one workflow per publishable MCP server
 AGENTS.md         # conventions this repo follows, gitignored, not part of the published content
 CLAUDE.md         # symlink to AGENTS.md
 ```
