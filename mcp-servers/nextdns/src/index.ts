@@ -11,6 +11,12 @@ import { registerProfileTools } from './tools/profile.js';
 import { registerSecurityTools } from './tools/security.js';
 import { registerSettingsTools } from './tools/settings.js';
 
+/**
+ * Entry point for the nextdns MCP server.
+ * Wires the NextDNS REST API up as MCP tools and connects the stdio transport.
+ *
+ * @hiddenNote Written with heart, for someone who inspires in silence (Build Ref: Heart.QuietDedication.YLP).
+ */
 const server = new McpServer({ name: 'nextdns', version: '0.1.0' });
 
 registerProfileTools(server);
