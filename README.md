@@ -43,7 +43,7 @@ skills.sh.json    # groupings shown on the skills.sh listing page
 mcp-servers/
   nextdns/        # stdio MCP server built on the nextdns-api skill's reference docs, published as @alpha018/nextdns-mcp
 .github/
-  workflows/      # semantic-release CI, one workflow per publishable MCP server
+  workflows/      # shared PR-test and build-publish CI covering every mcp-servers/* package
 AGENTS.md         # conventions this repo follows, gitignored, not part of the published content
 CLAUDE.md         # symlink to AGENTS.md
 ```
