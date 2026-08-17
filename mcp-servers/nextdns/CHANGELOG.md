@@ -1,3 +1,10 @@
+# [@alpha018/nextdns-mcp-v1.0.1](https://github.com/alpha018/alpha-skills/compare/nextdns-mcp-v1.0.0...nextdns-mcp-v1.0.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* **nextdns-mcp:** trigger publish via workflow_run, not tag push ([1d474f0](https://github.com/alpha018/alpha-skills/commit/1d474f048d864348d9d97a6d0c727cb8ed177e52))
+
 # @alpha018/nextdns-mcp-v1.0.0 (2026-08-17)
 
 
