@@ -1,6 +1,6 @@
 {
   "name": "@alpha018/nextdns-mcp",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Local stdio MCP server exposing the NextDNS REST API as tools.",
   "type": "module",
   "author": "github.com/alpha018",
