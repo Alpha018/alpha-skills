@@ -1,0 +1,37 @@
+name: Publish nextdns-mcp
+
+on:
+  push:
+    tags:
+      - "nextdns-mcp-v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mcp-servers/nextdns
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing (OIDC) needs npm >= 11.5.1; setup-node's bundled
+      # npm can lag behind that.
+      - run: npm install -g npm@latest
+
+      - run: npm ci
+      - run: npm run build
+
+      # No NPM_TOKEN: npm's CLI detects the GitHub Actions OIDC context
+      # (id-token: write above) and exchanges it for a short-lived publish
+      # token, provided this repo is linked as a Trusted Publisher on the
+      # @alpha018/nextdns-mcp package settings page on npmjs.com.
+      - run: npm publish --provenance
