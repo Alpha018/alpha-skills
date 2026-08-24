@@ -1,0 +1,13 @@
+Directory listing at repo root:
+
+package.json
+AGENTS.md
+tsconfig.json
+src/
+  domain/
+  application/
+  ports/
+  adapters/
+  main.ts
+test/
+.git/

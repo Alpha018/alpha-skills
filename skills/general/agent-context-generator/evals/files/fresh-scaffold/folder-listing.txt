@@ -1,0 +1,7 @@
+Directory listing at repo root (near-empty scaffold, no CLAUDE.md/AGENTS.md yet):
+
+package.json
+tsconfig.json
+src/
+  index.ts
+.git/
