@@ -1,0 +1,1 @@
+The external payment gateway has been intermittently down for the past hour (mix of timeouts and 503s). Every checkout request still calls PaymentGatewayClient.charge() directly, waits for the full timeout, and fails, and the growing pile of slow in-flight requests is now also degrading unrelated endpoints on the same service.

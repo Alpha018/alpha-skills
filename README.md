@@ -19,8 +19,27 @@ A homelab skills repository with two purposes that stay strictly separate: a gro
 |---|---|---|
 | [`nextdns-api`](skills/external/nextdns-api) | `external` | Full reference for the [NextDNS](https://nextdns.io) REST API: profiles, security/privacy/parental-control settings, denylist and allowlist management, analytics, and query logs. Includes a quick-reference table, common curl patterns, and a mirrored OpenAPI spec. |
 | [`progressive-search`](skills/local/progressive-search) | `local` | A discovery workflow that routes code questions to [CodeGraph](https://github.com/colbymchenry/codegraph) and Markdown/doc questions to [QMD](https://github.com/tobi/qmd), falling back to grep/find when neither is connected. Keeps an in-session graph of what's already been found so later searches build on earlier ones instead of repeating them. |
+| [`agent-context-generator`](skills/general/agent-context-generator) | `general` | Generates, refreshes, reviews, or audits a project's `CLAUDE.md`/`AGENTS.md`, grounded in what the repo actually contains (real dependencies, real folder layout, real scripts) instead of a generic template, and keeps both files in sync when a project has both. |
+| [`nestjs-iam-patterns`](skills/general/nestjs-iam-patterns) | `general` | Authentication and authorization patterns for NestJS: JWT access/refresh tokens, session auth, API keys, RBAC, permissions, policy-based (ABAC) authorization, Google Sign-In, and TOTP/2FA, led by a decision guide for which pattern fits a given situation. |
+| [`nestjs-advanced-patterns`](skills/general/nestjs-advanced-patterns) | `general` | Advanced NestJS internals (DI tokens, dynamic modules, runtime discovery, durable providers, worker threads, circuit breaker), WebSocket gateways, and microservices (transporter selection across TCP/Redis/MQTT/NATS/RabbitMQ/Kafka/gRPC), led by a decision table for which mechanism fits a given problem. |
 
 Each skill is a folder with a required `SKILL.md` (frontmatter plus instructions) and, optionally, `references/`, `scripts/`, and `assets/`. A skill's real identity is the `name` field in its frontmatter, not its folder path, though the two are kept in sync here.
+
+### Installing a skill
+
+Use the [`skills` CLI](https://www.npmjs.com/package/skills) to pull one or more skills straight from this repo, no cloning required:
+
+```bash
+npx skills add Alpha018/alpha-skills -s nextdns-api
+```
+
+Repeat `-s` for more than one skill in a single install, and add `-a <agent>` to target a specific agent (e.g. `claude-code`) instead of letting the CLI ask:
+
+```bash
+npx skills add Alpha018/alpha-skills -s nextdns-api -s progressive-search -a claude-code
+```
+
+`-y` skips confirmation prompts, and `--copy` copies the skill files instead of symlinking them. `npx skills add Alpha018/alpha-skills -l` lists every skill in the repo without installing anything.
 
 ## MCP servers
 
@@ -39,6 +58,9 @@ skills/
   local/          # self-hosted homelab infra, local developer workflows
     progressive-search/
   general/        # cross-cutting utilities not tied to a specific service
+    agent-context-generator/
+    nestjs-iam-patterns/
+    nestjs-advanced-patterns/
 skills.sh.json    # groupings shown on the skills.sh listing page
 mcp-servers/
   nextdns/        # stdio MCP server built on the nextdns-api skill's reference docs, published as @alpha018/nextdns-mcp

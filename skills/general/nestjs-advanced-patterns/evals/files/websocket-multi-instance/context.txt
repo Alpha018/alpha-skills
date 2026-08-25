@@ -1,0 +1,1 @@
+The API runs behind a load balancer with 3 replicas of the NestJS service. Clients connecting via socket.io randomly get disconnected or fail to receive messages after the initial handshake; it works fine locally with a single instance. Also need to validate the incoming order-status payload and reject unauthenticated connections.
