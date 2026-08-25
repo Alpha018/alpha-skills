@@ -1,0 +1,17 @@
+# AGENTS.md
+
+## Architecture: Hexagonal (Ports & Adapters)
+
+- `src/domain/` — entities and business rules, no framework imports
+- `src/application/` — use cases, orchestrates domain logic via ports
+- `src/ports/` — interfaces the application layer depends on (repositories, gateways)
+- `src/adapters/` — concrete implementations of ports (Postgres repository, HTTP controllers, message consumers)
+
+New business logic goes in `src/application/`. New persistence or transport
+code goes in `src/adapters/`, implementing an existing port under `src/ports/`
+rather than reaching into the domain layer directly.
+
+## Conventions
+
+- Constructor injection only; no property injection.
+- Domain entities never import anything from `@nestjs/*`.

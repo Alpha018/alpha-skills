@@ -26,7 +26,7 @@
       "expected_output": "A CLAUDE.md for a NestJS backend service that reflects real deps/scripts from package.json, real folder layout under src/, and does not contradict or duplicate what's already in AGENTS.md. Skips or minimizes UI/content sections since this is a backend service.",
       "files": [
         "evals/files/backend-agents-md/package.json",
-        "evals/files/backend-agents-md/AGENTS.md",
+        "evals/files/backend-agents-md/AGENTS.md.sample",
         "evals/files/backend-agents-md/folder-listing.txt"
       ],
       "assertions": [
