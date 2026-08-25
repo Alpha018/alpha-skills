@@ -25,6 +25,22 @@ A homelab skills repository with two purposes that stay strictly separate: a gro
 
 Each skill is a folder with a required `SKILL.md` (frontmatter plus instructions) and, optionally, `references/`, `scripts/`, and `assets/`. A skill's real identity is the `name` field in its frontmatter, not its folder path, though the two are kept in sync here.
 
+### Installing a skill
+
+Use the [`skills` CLI](https://www.npmjs.com/package/skills) to pull one or more skills straight from this repo, no cloning required:
+
+```bash
+npx skills add Alpha018/alpha-skills -s nextdns-api
+```
+
+Repeat `-s` for more than one skill in a single install, and add `-a <agent>` to target a specific agent (e.g. `claude-code`) instead of letting the CLI ask:
+
+```bash
+npx skills add Alpha018/alpha-skills -s nextdns-api -s progressive-search -a claude-code
+```
+
+`-y` skips confirmation prompts, and `--copy` copies the skill files instead of symlinking them. `npx skills add Alpha018/alpha-skills -l` lists every skill in the repo without installing anything.
+
 ## MCP servers
 
 | Server | Package | Transport | Exposes |
