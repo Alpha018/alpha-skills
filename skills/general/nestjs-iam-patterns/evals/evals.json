@@ -1,0 +1,58 @@
+{
+  "skill_name": "nestjs-iam-patterns",
+  "evals": [
+    {
+      "id": 0,
+      "name": "add-jwt-refresh-rotation",
+      "prompt": "Este servicio solo tiene un access token de JWT que dura para siempre, necesito agregar refresh tokens con rotación para que expire y se pueda renovar.",
+      "expected_output": "Adds a refresh token flow on top of the existing access-token-only setup: a refresh token DTO/endpoint, refresh token signing, and rotation/invalidation tracked in Redis (flagging that Redis needs to be added, since the current docker-compose only has postgres). Reuses the existing AuthenticationService and User entity rather than replacing them. Does not introduce session-based auth or API keys, since neither was asked for.",
+      "files": [
+        "evals/files/jwt-refresh-addon/package.json",
+        "evals/files/jwt-refresh-addon/authentication.service.ts",
+        "evals/files/jwt-refresh-addon/folder-listing.txt"
+      ],
+      "assertions": [
+        "Recognizes the existing access-token-only JWT setup and extends it rather than rewriting auth from scratch",
+        "Adds refresh token generation, storage, and rotation grounded in references/jwt-authentication.md",
+        "Flags that Redis is not yet part of this project's stack (docker-compose only has postgres) instead of silently assuming it's available",
+        "Does not add session-based auth, API keys, roles/permissions/policies, Google Sign-In, or 2FA — none of that was requested",
+        "TTL values are treated as seconds, not milliseconds"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "choose-auth-pattern-cli-integration",
+      "prompt": "Necesito que un cronjob interno y un webhook de un partner puedan llamar a este servicio de facturación. No hay usuarios humanos todavía.",
+      "expected_output": "Recommends API key authentication rather than JWT or session auth, explaining why: both callers are machine clients, not interactive human sessions, and there is no user login flow to attach JWT/session state to. Implements the API key entity, hashing, and guard from references/api-key-authentication.md, scoped appropriately for a cron job vs. a partner webhook (e.g. separate keys/scopes for each).",
+      "files": [
+        "evals/files/integration-api-key/package.json",
+        "evals/files/integration-api-key/folder-listing.txt"
+      ],
+      "assertions": [
+        "Recommends API key authentication over JWT or session auth, with an explicit reason tied to the machine-to-machine nature of both callers",
+        "Does not implement a user sign-up/sign-in flow, since there are no human users",
+        "API keys are stored hashed, never in plain text, per references/api-key-authentication.md",
+        "Suggests separate keys/scopes per caller (cron job vs. partner webhook) rather than one shared key",
+        "Checks the boolean result of key validation before granting access"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "add-rbac-authorization",
+      "prompt": "Quiero que solo los supervisores puedan cerrar o reasignar tickets, los agentes normales no. ¿Cómo lo implemento en NestJS?",
+      "expected_output": "Recommends role-based authorization (RBAC) over granular permissions or policies, since the described access model is a simple two-category split (agent vs. supervisor) with no per-action granularity or contextual/ownership rule mentioned. Implements the Role enum, Roles decorator, and RolesGuard from references/authorization-strategies.md, adding a role column to the existing User entity. Does not introduce a permissions system or policy handlers, since the described need doesn't call for that granularity.",
+      "files": [
+        "evals/files/rbac-addon/package.json",
+        "evals/files/rbac-addon/user.entity.ts",
+        "evals/files/rbac-addon/folder-listing.txt"
+      ],
+      "assertions": [
+        "Recommends roles (RBAC) rather than permissions or policies, with reasoning tied to the two-category access model described",
+        "Adds a role column/enum to the existing User entity instead of creating a parallel authorization model",
+        "Implements Roles decorator + RolesGuard grounded in references/authorization-strategies.md",
+        "Uses .some() role-matching semantics, not .every()",
+        "Does not add a full permissions or policy system unless the user's request is reinterpreted to need it"
+      ]
+    }
+  ]
+}
