@@ -1,0 +1,70 @@
+[
+  {
+    "query": "necesito agregar login con JWT a esta API de NestJS, con access token y refresh token",
+    "should_trigger": true
+  },
+  {
+    "query": "how do I add role-based access control in NestJS so only admins can delete users?",
+    "should_trigger": true
+  },
+  {
+    "query": "quiero que un servicio externo pueda llamar a nuestra API con una API key en vez de que tenga que loguearse",
+    "should_trigger": true
+  },
+  {
+    "query": "can you add Google Sign-In to this NestJS backend on top of our existing JWT auth?",
+    "should_trigger": true
+  },
+  {
+    "query": "necesito implementar 2FA con TOTP para los usuarios de esta app de NestJS",
+    "should_trigger": true
+  },
+  {
+    "query": "not sure if I should use sessions or JWT for this NestJS app, what's the actual difference in practice?",
+    "should_trigger": true
+  },
+  {
+    "query": "quiero agregar autenticación por sesión con Redis en vez de JWT para esta app de NestJS",
+    "should_trigger": true
+  },
+  {
+    "query": "necesito un sistema de permisos más granular que roles para esta API de NestJS, algo tipo create_order, delete_order",
+    "should_trigger": true
+  },
+  {
+    "query": "queremos que solo el dueño de un recurso pueda editarlo, no cualquier usuario con el mismo rol, en nuestra API NestJS",
+    "should_trigger": true
+  },
+  {
+    "query": "can you write the React login form for our app, calling POST /auth/sign-in?",
+    "should_trigger": false
+  },
+  {
+    "query": "necesito configurar CORS en este proyecto de NestJS",
+    "should_trigger": false
+  },
+  {
+    "query": "how do I set up TypeORM migrations for this NestJS project?",
+    "should_trigger": false
+  },
+  {
+    "query": "quiero agregar autenticación con JWT a mi API en Express, no uso NestJS",
+    "should_trigger": false
+  },
+  {
+    "query": "puedes revisar por qué este endpoint de NestJS está devolviendo un 500 en vez de crear el registro?",
+    "should_trigger": false
+  },
+  {
+    "query": "necesito escribir tests e2e para el módulo de pedidos de este proyecto NestJS",
+    "should_trigger": false
+  },
+  {
+    "query": "help me set up Swagger/OpenAPI docs for this NestJS API",
+    "should_trigger": false
+  },
+  {
+    "query": "necesito optimizar esta query de TypeORM que está haciendo N+1",
+    "should_trigger": false
+  }
+]

@@ -1,0 +1,16 @@
+support-desk-api/
+├── package.json
+└── src/
+    ├── app.module.ts
+    ├── main.ts
+    ├── auth/
+    │   ├── authentication.service.ts
+    │   └── access-token.guard.ts
+    ├── users/
+    │   └── user.entity.ts
+    └── tickets/
+        ├── tickets.controller.ts
+        └── tickets.service.ts
+
+# Two user types today: regular agents, and supervisors who can close and
+# reassign any ticket. No granular action-level permissions are needed yet.

@@ -1,0 +1,15 @@
+orders-api/
+├── package.json
+├── src/
+│   ├── app.module.ts
+│   ├── main.ts
+│   ├── auth/
+│   │   ├── authentication.service.ts
+│   │   ├── authentication.controller.ts
+│   │   ├── access-token.guard.ts
+│   │   └── user.entity.ts
+│   └── orders/
+│       ├── orders.module.ts
+│       ├── orders.controller.ts
+│       └── orders.service.ts
+└── docker-compose.yml   (postgres only, no redis service)

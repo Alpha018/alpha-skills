@@ -1,0 +1,59 @@
+{
+  "skill_name": "agent-context-generator",
+  "evals": [
+    {
+      "id": 0,
+      "name": "minimal-fresh-scaffold",
+      "prompt": "Necesito un CLAUDE.md para este proyecto, es bien nuevo todavía casi sin código.",
+      "expected_output": "A CLAUDE.md grounded in the actual (minimal) repo state — real package.json scripts/deps, real (sparse) folder structure. Should NOT fabricate a rich architecture or UI rules that aren't there yet; should flag what's unknown/TBD or ask the user instead of inventing plausible-sounding content.",
+      "files": [
+        "evals/files/fresh-scaffold/package.json",
+        "evals/files/fresh-scaffold/tsconfig.json",
+        "evals/files/fresh-scaffold/folder-listing.txt"
+      ],
+      "assertions": [
+        "Does not invent commands beyond the real package.json script (only 'build': 'tsc' exists — no dev/lint/test scripts)",
+        "Does not fabricate an elaborate multi-folder architecture or UI/design-system rules that aren't present in this near-empty scaffold",
+        "Explicitly flags unknowns/TBD or asks the user for missing specifics instead of inventing generic content",
+        "Mentions the real tech stack detected (TypeScript, tsc build) grounded in package.json/tsconfig.json",
+        "Uses markdown ## headers matching the section structure from the skill"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "backend-with-existing-agents-md",
+      "prompt": "Genera un CLAUDE.md para este microservicio NestJS. Ya existe un AGENTS.md, tenlo en cuenta.",
+      "expected_output": "A CLAUDE.md for a NestJS backend service that reflects real deps/scripts from package.json, real folder layout under src/, and does not contradict or duplicate what's already in AGENTS.md. Skips or minimizes UI/content sections since this is a backend service.",
+      "files": [
+        "evals/files/backend-agents-md/package.json",
+        "evals/files/backend-agents-md/AGENTS.md.sample",
+        "evals/files/backend-agents-md/folder-listing.txt"
+      ],
+      "assertions": [
+        "Reflects the real Hexagonal Architecture (Ports & Adapters) layout described in AGENTS.md rather than a generic NestJS layout",
+        "Commands section only lists real package.json scripts — no invented commands",
+        "Does not silently duplicate or contradict AGENTS.md",
+        "Skips or minimizes UI/design-system and content/copy-guidance sections",
+        "Includes safe-change rules grounded in this project's real constraints"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "full-app-nestjs-prisma",
+      "prompt": "Crea el CLAUDE.md de este proyecto para que Claude Code deje de asumir cosas raras del stack.",
+      "expected_output": "A complete CLAUDE.md covering the sections that apply to a NestJS + Prisma ticket platform, grounded in the actual repo (prisma/, src/, libs/), not generic NestJS boilerplate.",
+      "files": [
+        "evals/files/full-app/package.json",
+        "evals/files/full-app/prisma/schema.prisma",
+        "evals/files/full-app/folder-listing.txt"
+      ],
+      "assertions": [
+        "Tech stack section names the real stack with real dependencies from package.json (NestJS 10, Prisma 5)",
+        "Commands section only lists real package.json scripts",
+        "Architecture section reflects the real src/, libs/, prisma/ folder layout",
+        "Includes safe-change rules covering something concrete to this project (e.g. Prisma schema/migrations)",
+        "Only applicable sections are filled in with real content, no padding"
+      ]
+    }
+  ]
+}

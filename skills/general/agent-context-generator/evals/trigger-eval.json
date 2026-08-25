@@ -1,0 +1,90 @@
+[
+  {
+    "query": "acabo de clonar este repo de mi trabajo, es un monorepo con turborepo y como 6 apps adentro, necesito que generes un CLAUDE.md pero que sea bueno de verdad, no uno generico",
+    "should_trigger": true
+  },
+  {
+    "query": "armame un archivo CLAUDE.md para este proyecto de Django, todavia no tiene ninguno",
+    "should_trigger": true
+  },
+  {
+    "query": "I keep having to tell Claude the same things every session about our Next.js app - can you set up a CLAUDE.md so it stops assuming we use Redux when we actually use Zustand?",
+    "should_trigger": true
+  },
+  {
+    "query": "necesito actualizar el CLAUDE.md que ya existe, quedo desactualizado despues de migrar de Express a Fastify",
+    "should_trigger": true
+  },
+  {
+    "query": "what should go in a CLAUDE.md file for a Python FastAPI backend? we are setting up a new repo and want Claude Code to actually understand our layout",
+    "should_trigger": true
+  },
+  {
+    "query": "genera un AGENTS.md para este proyecto, es lo mismo que un claude.md pero para otros agentes tambien, asume que debes hacer un symlink",
+    "should_trigger": true
+  },
+  {
+    "query": "Claude sigue proponiendo usar axios cuando nosotros usamos ky para todo, y tambien sigue creando componentes en carpetas raras. Hay alguna forma de que se acuerde de esto entre sesiones?",
+    "should_trigger": true
+  },
+  {
+    "query": "can you scaffold a base CLAUDE.md for our new microservice repo, it's basically empty right now, just the nest-cli scaffold",
+    "should_trigger": true
+  },
+  {
+    "query": "revisa el CLAUDE.md que hicimos hace 3 meses, siento que ya no refleja como esta estructurado el proyecto ahora que agregamos el modulo de pagos",
+    "should_trigger": true
+  },
+  {
+    "query": "necesito documentar las reglas del proyecto para que la IA no rompa cosas, cual es la mejor forma de hacerlo",
+    "should_trigger": true
+  },
+  {
+    "query": "puedes escribirme un README.md para este proyecto? quiero que se vea bien en GitHub, con badges y todo",
+    "should_trigger": false
+  },
+  {
+    "query": "necesito escribir la documentacion tecnica del proyecto en docs/architecture.md, explicando como interactuan los microservicios",
+    "should_trigger": false
+  },
+  {
+    "query": "estoy configurando GitHub Copilot en este repo, necesito un .github/copilot-instructions.md",
+    "should_trigger": false
+  },
+  {
+    "query": "why does Claude keep timing out when I ask it to refactor the auth module, is there a config file I need to check?",
+    "should_trigger": false
+  },
+  {
+    "query": "quiero escribir un CONTRIBUTING.md explicando como la gente externa puede contribuir al proyecto open source",
+    "should_trigger": false
+  },
+  {
+    "query": "help me write the package.json description and keywords fields for npm publish",
+    "should_trigger": false
+  },
+  {
+    "query": "necesito revisar el system_prompt.md que usamos para nuestro chatbot interno, puedes optimizarlo?",
+    "should_trigger": false
+  },
+  {
+    "query": "can you set up ESLint and Prettier configs for this TypeScript project, we don't have any linting right now",
+    "should_trigger": false
+  },
+  {
+    "query": "necesito que armes el .env.example de este proyecto con todas las variables que usamos",
+    "should_trigger": false
+  },
+  {
+    "query": "genera un CHANGELOG.md con el historial de versiones del proyecto",
+    "should_trigger": false
+  },
+  {
+    "query": "actualiza los componentes, librerías y elementos varios para claude.md o agents.md",
+    "should_trigger": true
+  },
+  {
+    "query": "manten sincronizado el claude.md y agents.md con un symlink",
+    "should_trigger": true
+  }
+]

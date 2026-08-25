@@ -1,0 +1,14 @@
+billing-service/
+├── package.json
+└── src/
+    ├── app.module.ts
+    ├── main.ts
+    ├── invoices/
+    │   ├── invoices.controller.ts
+    │   ├── invoices.service.ts
+    │   └── invoices.module.ts
+    └── users/
+        └── user.entity.ts
+
+# No auth module exists yet. This service has no human users; it only
+# receives calls from an internal payments cron job and a partner webhook.

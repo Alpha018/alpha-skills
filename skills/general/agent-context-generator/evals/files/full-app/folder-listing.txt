@@ -1,0 +1,15 @@
+Directory listing at repo root:
+
+package.json
+prisma/
+  schema.prisma
+  migrations/
+src/
+  tickets/
+  users/
+  common/
+  main.ts
+libs/
+  shared-dto/
+test/
+.git/
