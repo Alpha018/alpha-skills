@@ -1,0 +1,6 @@
+Nest can't resolve dependencies of the OrdersService (?). Please make sure that the argument Object at index [0] is available in the OrdersModule context.
+
+Potential solutions:
+- Is OrdersModule a valid NestJS module?
+- If Object is a provider, is it part of the current OrdersModule?
+- If Object is exported from a separate @Module, is that module imported within OrdersModule?

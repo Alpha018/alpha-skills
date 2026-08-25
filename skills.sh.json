@@ -14,7 +14,7 @@
     {
       "title": "General",
       "description": "Cross-cutting utilities not tied to a specific service.",
-      "skills": ["agent-context-generator", "nestjs-iam-patterns"]
+      "skills": ["agent-context-generator", "nestjs-iam-patterns", "nestjs-advanced-patterns"]
     }
   ]
 }

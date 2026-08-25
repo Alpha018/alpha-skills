@@ -1,0 +1,1 @@
+While the /reports/summary endpoint runs for a large row count, every other endpoint on the same NestJS instance stops responding, including simple health checks, until the report finishes. The report generation is pure in-memory computation (aggregation, sorting, formatting), not a database or network call.

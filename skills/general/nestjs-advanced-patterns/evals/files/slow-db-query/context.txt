@@ -1,0 +1,1 @@
+The /reports/monthly-totals endpoint is slow, taking 4-6 seconds. Database query logs show the query itself is what's slow (a large table scan with no supporting index); CPU usage on the NestJS process during the request stays low the whole time.

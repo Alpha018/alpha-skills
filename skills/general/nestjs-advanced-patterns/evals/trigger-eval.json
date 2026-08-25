@@ -1,0 +1,110 @@
+[
+  {
+    "query": "estoy recibiendo 'Nest can't resolve dependencies of the OrdersService' y el paramtype sale como Object, no entiendo por que si el servicio esta bien inyectado",
+    "should_trigger": true
+  },
+  {
+    "query": "necesito que mi HttpClientModule en NestJS soporte HttpClientModule.registerAsync() como los modulos oficiales de Nest, para poder inyectar el ConfigService",
+    "should_trigger": true
+  },
+  {
+    "query": "tengo un backend multi-tenant en NestJS, el datasource es request-scoped y la latencia se dispara con carga, como lo optimizo sin perder el aislamiento por tenant?",
+    "should_trigger": true
+  },
+  {
+    "query": "cuando pego a mi endpoint de reportes con muchas filas, toda la API deja de responder hasta que termina, es puro calculo en memoria no hace queries",
+    "should_trigger": true
+  },
+  {
+    "query": "el gateway de pagos externo lleva una hora caido intermitente y cada checkout espera el timeout completo, degradando el resto del servicio, que patron uso?",
+    "should_trigger": true
+  },
+  {
+    "query": "quiero armar un schematic custom para que cuando el equipo genere un nuevo microservicio con nest g, ya venga con logging, health checks y Dockerfile aplicados automaticamente",
+    "should_trigger": true
+  },
+  {
+    "query": "necesito descubrir en runtime todos los providers de NestJS que tengan un decorador custom @Interval(ms) para armar un scheduler, como lo hago con DiscoveryService?",
+    "should_trigger": true
+  },
+  {
+    "query": "tengo un evento que se dispara desde un controller y un listener desacoplado necesita acceder al request original, como paso el contexto request-scoped a traves del EventEmitter?",
+    "should_trigger": true
+  },
+  {
+    "query": "quiero armar un modulo de i18n en NestJS que soporte varios idiomas sin que cada request tenga que reconstruir todo el arbol de DI, conviene usar durable providers?",
+    "should_trigger": true
+  },
+  {
+    "query": "estoy pensando en cargar un modulo de reportes de forma lazy en NestJS porque casi nadie lo usa y tarda en inicializar, vale la pena LazyModuleLoader aca?",
+    "should_trigger": true
+  },
+  {
+    "query": "puedes ayudarme a escribir el controller y el servicio basico de un CRUD de productos en NestJS con TypeORM?",
+    "should_trigger": false
+  },
+  {
+    "query": "como configuro class-validator para que el DTO de creacion de usuario valide el email y el password minimo 8 caracteres?",
+    "should_trigger": false
+  },
+  {
+    "query": "necesito escribir tests unitarios con Jest para este UsersService de NestJS, mockeando el repository",
+    "should_trigger": false
+  },
+  {
+    "query": "como agrego Swagger a mi API de NestJS para que se genere la documentacion automatica de los endpoints?",
+    "should_trigger": false
+  },
+  {
+    "query": "este endpoint de reportes tarda 5 segundos, revise los logs y la query en si es lenta por un table scan sin indice, la CPU de node se mantiene baja toda la request, mejor lo mando a un worker thread?",
+    "should_trigger": true
+  },
+  {
+    "query": "quiero agregar rate limiting basico a mi API de NestJS usando @nestjs/throttler",
+    "should_trigger": false
+  },
+  {
+    "query": "como hago que un guard de NestJS redirija a login si el usuario no esta autenticado en una app con vistas server-side?",
+    "should_trigger": false
+  },
+  {
+    "query": "necesito subir un archivo a S3 desde un endpoint de NestJS usando multer, como configuro el interceptor de archivos?",
+    "should_trigger": false
+  },
+  {
+    "query": "mi gateway de NestJS con socket.io funciona en local pero en produccion con varias replicas detras de un load balancer los clientes se desconectan random, como lo soluciono?",
+    "should_trigger": true
+  },
+  {
+    "query": "necesito validar el payload de un evento de WebSocket en NestJS antes de procesarlo y rechazar la conexion si el usuario no esta autenticado, como aplico guards y pipes a un gateway?",
+    "should_trigger": true
+  },
+  {
+    "query": "estoy armando un chat en tiempo real con NestJS, deberia usar socket.io o la libreria ws directamente? necesito namespaces y salas",
+    "should_trigger": true
+  },
+  {
+    "query": "como le agrego CORS a mi controller REST de NestJS para que el frontend en otro dominio pueda pegarle a la API?",
+    "should_trigger": false
+  },
+  {
+    "query": "mi microservicio de NestJS con Redis pierde eventos por completo cuando el consumidor estaba caido en el momento en que se publico el mensaje, no hay ningun error ni log",
+    "should_trigger": true
+  },
+  {
+    "query": "no se si usar RabbitMQ o Kafka para comunicar dos microservicios de NestJS, necesito que los mensajes no se pierdan nunca aunque el consumidor este caido",
+    "should_trigger": true
+  },
+  {
+    "query": "tengo un guard en un microservicio de NestJS que lanza HttpException pero el cliente recibe una respuesta rara, no deberia ser lo mismo que en un controller HTTP normal?",
+    "should_trigger": true
+  },
+  {
+    "query": "quiero armar un microservicio con gRPC en NestJS que hable con un servicio en Go, necesito streaming bidireccional",
+    "should_trigger": true
+  },
+  {
+    "query": "puedes ayudarme a escribir el DTO y el controller REST para crear una orden en mi API de NestJS con validacion basica de class-validator?",
+    "should_trigger": false
+  }
+]

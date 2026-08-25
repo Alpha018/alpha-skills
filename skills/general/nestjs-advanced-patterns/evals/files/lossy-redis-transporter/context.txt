@@ -1,0 +1,1 @@
+The order-processing microservice occasionally misses order_created events entirely: no error, no log, the order just never gets charged or has its inventory decremented. It only seems to happen when the consumer service was briefly down or redeploying at the moment the event was published. Currently using the Redis transporter.

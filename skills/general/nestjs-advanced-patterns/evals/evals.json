@@ -1,0 +1,119 @@
+{
+  "skill_name": "nestjs-advanced-patterns",
+  "evals": [
+    {
+      "id": 0,
+      "name": "unresolved-di-token",
+      "prompt": "Estoy recibiendo este error en mi NestJS al arrancar la app, no entiendo por qué no puede resolver la dependencia.",
+      "expected_output": "Diagnoses the root cause: OrdersDataSource is a TypeScript interface, which is erased at compile time, so Nest sees the constructor parameter as an unresolvable Object token. Recommends replacing it with a Symbol (or string/class) runtime token registered as a custom provider and injected explicitly with @Inject(), per references/dependency-injection-tokens.md. Does not suggest an unrelated fix (request scope, dynamic modules, etc.).",
+      "files": [
+        "evals/files/unresolved-di-token/orders.service.ts",
+        "evals/files/unresolved-di-token/error.txt"
+      ],
+      "assertions": [
+        "Identifies that OrdersDataSource being a TypeScript interface (erased at compile time) is the root cause",
+        "Recommends a Symbol (or equivalent runtime) token registered via a custom provider, not a workaround that avoids the real issue",
+        "Shows explicit @Inject(TOKEN) usage in the constructor",
+        "Does not recommend an unrelated advanced pattern (dynamic modules, durable providers, discovery) for what is a basic DI token problem"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "tenant-scoped-provider-perf",
+      "prompt": "Tenemos un backend multi-tenant en NestJS, el proveedor de datasource es request-scoped y con la carga actual la latencia se está disparando. ¿Cómo lo optimizamos sin perder el aislamiento por tenant?",
+      "expected_output": "Recommends durable providers with a custom ContextIdStrategy aggregating by tenant, given the bounded (~40) tenant count described in context.txt, rather than simply removing request scope (which would break tenant isolation) or leaving it as-is. Explains that durable: true plus the aggregation strategy reuses one DI sub-tree per tenant instead of one per request. Flags the security point: the tenant id used for aggregation must come from an authenticated/authorized source, not a raw client header, per references/durable-providers.md.",
+      "files": [
+        "evals/files/tenant-scoped-provider-perf/data-source.service.ts",
+        "evals/files/tenant-scoped-provider-perf/context.txt"
+      ],
+      "assertions": [
+        "Recommends durable providers (scope: REQUEST, durable: true) with a ContextIdStrategy aggregating by tenant",
+        "Explicitly ties the recommendation to the bounded tenant cardinality (~40) described in context.txt, not durability in general",
+        "Does not recommend simply dropping request scope entirely, since that would break per-tenant isolation",
+        "Flags that the tenant identifier used for aggregation must be derived from an authenticated/authorized source, not trusted directly from a client-supplied header",
+        "Explains that REQUEST inside the durable sub-tree resolves to the strategy's payload, not necessarily the raw HTTP request"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "cpu-heavy-endpoint-blocking",
+      "prompt": "Cuando pego a /reports/summary con muchas filas, toda mi API de NestJS deja de responder hasta que termina, incluso el health check. Es puro cálculo en memoria, no hace queries ni llamadas de red.",
+      "expected_output": "Recommends offloading the computation to a worker thread (pool library like Piscina, or a manual Worker host), correctly diagnosing this as CPU-bound work blocking the single-threaded event loop, per references/worker-threads.md. Explains why this differs from I/O-bound slowness. Does not recommend an I/O-oriented fix (caching a database query, connection pooling) since there's no I/O involved per the given context.",
+      "files": [
+        "evals/files/cpu-heavy-endpoint-blocking/reports.controller.ts",
+        "evals/files/cpu-heavy-endpoint-blocking/context.txt"
+      ],
+      "assertions": [
+        "Correctly diagnoses this as CPU-bound work blocking the event loop, not an I/O bottleneck",
+        "Recommends worker threads (pool library or manual Worker host) to offload the computation",
+        "Explains that other endpoints stall specifically because Node's single event loop thread is occupied by synchronous computation",
+        "Does not propose an I/O-focused fix (query caching, connection pooling, request scope) for what is explicitly CPU-bound work"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "flaky-payment-gateway",
+      "prompt": "El gateway de pagos externo lleva como una hora caido intermitente, y cada checkout sigue llamando directo y esperando el timeout completo, lo que está degradando el resto del servicio. ¿Qué patrón me conviene acá?",
+      "expected_output": "Recommends a circuit breaker placed around the PaymentGatewayClient call itself (not the whole checkout controller), per references/circuit-breaker.md. Explains the closed/open/half-open state machine and fail-fast behavior once the failure threshold trips, and flags retry amplification as a related risk to avoid layering on top. Distinguishes this from a plain retry, which would make an already-degraded dependency worse.",
+      "files": [
+        "evals/files/flaky-payment-gateway/payment-gateway.client.ts",
+        "evals/files/flaky-payment-gateway/context.txt"
+      ],
+      "assertions": [
+        "Recommends a circuit breaker, not just a retry, and explains why retry alone would make things worse here",
+        "Places the breaker around the PaymentGatewayClient/remote call itself rather than the entire checkout controller",
+        "Describes the closed/open/half-open state machine and that open state fails fast without calling the gateway",
+        "Mentions retry amplification or a similar caution against stacking additional retry layers on top of the breaker"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "slow-db-query-not-cpu-bound",
+      "prompt": "Este endpoint de reportes tarda como 5 segundos, revisé los logs y la query en si es lenta por un table scan sin indice, la CPU de node se mantiene baja durante toda la request. ¿mejor lo mando a un worker thread para no bloquear el event loop?",
+      "expected_output": "Correctly explains that worker threads would not help here, since the bottleneck is I/O-bound (a slow database query already awaited asynchronously), not CPU-bound work blocking the event loop. Points at the actual fix instead (adding the missing index / query optimization), and explains the general I/O-bound vs CPU-bound distinction from references/worker-threads.md.",
+      "files": [
+        "evals/files/slow-db-query/reports.service.ts",
+        "evals/files/slow-db-query/context.txt"
+      ],
+      "assertions": [
+        "Explicitly recommends against worker threads for this case, since the bottleneck is I/O-bound, not CPU-bound",
+        "Correctly attributes the slowness to the query itself (missing index / table scan) rather than event-loop blocking",
+        "Explains the I/O-bound vs CPU-bound distinction as the reason worker threads would not help",
+        "Points toward the actual fix (indexing/query optimization) instead of introducing an unrelated advanced pattern"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "websocket-multi-instance-and-validation",
+      "prompt": "Mi gateway de NestJS con socket.io funciona bien en local pero en producción, con 3 réplicas detrás de un load balancer, los clientes se desconectan random o no reciben mensajes. También necesito validar el payload de order-status y rechazar conexiones sin autenticar.",
+      "expected_output": "Diagnoses the multi-instance issue as socket.io's HTTP long-polling fallback not reaching the same backend instance across requests, and recommends either disabling polling client-side (transports: ['websocket']) or enabling sticky/cookie-based routing on the load balancer, per references/websockets.md. Separately recommends a ValidationPipe with a WsException-throwing exceptionFactory for payload validation, and a guard (also throwing WsException, not HttpException) for rejecting unauthenticated connections. Does not conflate the two problems or propose an unrelated pattern from the rest of the skill for either.",
+      "files": [
+        "evals/files/websocket-multi-instance/orders-gateway.ts",
+        "evals/files/websocket-multi-instance/context.txt"
+      ],
+      "assertions": [
+        "Correctly attributes the multi-instance disconnect/message-loss issue to socket.io's polling fallback not reaching a consistent backend instance",
+        "Recommends disabling polling (transports: ['websocket']) or sticky/cookie-based load balancer routing as the fix",
+        "Recommends a ValidationPipe with a custom exceptionFactory throwing WsException for payload validation",
+        "Recommends a guard throwing WsException (not HttpException) for rejecting unauthenticated connections",
+        "Keeps the two problems (load-balancing and validation/auth) clearly separated rather than merging them into one fix"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "lossy-redis-transporter",
+      "prompt": "El microservicio de procesamiento de órdenes a veces pierde eventos order_created por completo, sin error ni log, justo cuando el consumidor estaba redeployando. Estamos usando el transporter de Redis.",
+      "expected_output": "Correctly diagnoses this as an inherent property of the Redis transporter's fire-and-forget pub/sub model: a message published while no subscriber is connected is simply dropped, with no delivery guarantee, per references/microservices-transporters.md. Recommends switching to a transporter with real delivery guarantees for this use case, such as RabbitMQ with manual acknowledgment (noAck: false) or Kafka with consumer offset management, rather than a workaround that keeps Redis. Does not suggest simply adding a generic retry, since the message was never received at all.",
+      "files": [
+        "evals/files/lossy-redis-transporter/orders.controller.ts",
+        "evals/files/lossy-redis-transporter/context.txt"
+      ],
+      "assertions": [
+        "Correctly attributes the silent message loss to Redis pub/sub's lack of delivery guarantees, not a bug in the handler code",
+        "Recommends switching to a transporter with real delivery guarantees (RabbitMQ with manual ack, or Kafka) rather than patching around Redis",
+        "Explains why the fix must happen at the transporter/architecture level, not by adding a retry inside the handler",
+        "References the decision table in references/microservices-transporters.md when justifying the recommended transporter"
+      ]
+    }
+  ]
+}
