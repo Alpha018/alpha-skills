@@ -22,18 +22,24 @@ A homelab skills repository with two purposes that stay strictly separate: a gro
 | [`agent-context-generator`](skills/general/agent-context-generator) | `general` | Generates, refreshes, reviews, or audits a project's `CLAUDE.md`/`AGENTS.md`, grounded in what the repo actually contains (real dependencies, real folder layout, real scripts) instead of a generic template, and keeps both files in sync when a project has both. |
 | [`nestjs-iam-patterns`](skills/general/nestjs-iam-patterns) | `general` | Authentication and authorization patterns for NestJS: JWT access/refresh tokens, session auth, API keys, RBAC, permissions, policy-based (ABAC) authorization, Google Sign-In, and TOTP/2FA, led by a decision guide for which pattern fits a given situation. |
 | [`nestjs-advanced-patterns`](skills/general/nestjs-advanced-patterns) | `general` | Advanced NestJS internals (DI tokens, dynamic modules, runtime discovery, durable providers, worker threads, circuit breaker), WebSocket gateways, and microservices (transporter selection across TCP/Redis/MQTT/NATS/RabbitMQ/Kafka/gRPC), led by a decision table for which mechanism fits a given problem. |
+| [`obsidian-second-brain`](skills/general/obsidian-second-brain) | `general` | A decision guide for running an Obsidian vault as a lasting knowledge system: which of the four organizers leads (PARA folders, Zettelkasten links, or a mix), a small capture-and-review loop, plugin hygiene, Bases vs Dataview, a set of templates, and an optional MCP layer for handing the vault to an agent. Leads with when Obsidian is the wrong tool. |
 
 Each skill is a folder with a required `SKILL.md` (frontmatter plus instructions) and, optionally, `references/`, `scripts/`, and `assets/`. A skill's real identity is the `name` field in its frontmatter, not its folder path, though the two are kept in sync here.
 
 ### Installing a skill
 
-Use the [`skills` CLI](https://www.npmjs.com/package/skills) to pull one or more skills straight from this repo, no cloning required:
+Use the [`skills` CLI](https://www.npmjs.com/package/skills) to pull skills straight from this repo, no cloning required. One command per skill:
 
 ```bash
 npx skills add Alpha018/alpha-skills -s nextdns-api
+npx skills add Alpha018/alpha-skills -s progressive-search
+npx skills add Alpha018/alpha-skills -s agent-context-generator
+npx skills add Alpha018/alpha-skills -s nestjs-iam-patterns
+npx skills add Alpha018/alpha-skills -s nestjs-advanced-patterns
+npx skills add Alpha018/alpha-skills -s obsidian-second-brain
 ```
 
-Repeat `-s` for more than one skill in a single install, and add `-a <agent>` to target a specific agent (e.g. `claude-code`) instead of letting the CLI ask:
+Repeat `-s` to install several at once, and add `-a <agent>` to target a specific agent (e.g. `claude-code`) instead of letting the CLI ask:
 
 ```bash
 npx skills add Alpha018/alpha-skills -s nextdns-api -s progressive-search -a claude-code
@@ -61,6 +67,7 @@ skills/
     agent-context-generator/
     nestjs-iam-patterns/
     nestjs-advanced-patterns/
+    obsidian-second-brain/
 skills.sh.json    # groupings shown on the skills.sh listing page
 mcp-servers/
   nextdns/        # stdio MCP server built on the nextdns-api skill's reference docs, published as @alpha018/nextdns-mcp
