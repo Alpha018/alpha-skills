@@ -1,0 +1,82 @@
+[
+  {
+    "query": "acabo de instalar Obsidian y no se por donde empezar, quiero armarlo como un second brain",
+    "should_trigger": true
+  },
+  {
+    "query": "mi vault de Obsidian es un desastre, tengo cientos de notas sueltas y el graph esta lleno de nodos huerfanos",
+    "should_trigger": true
+  },
+  {
+    "query": "should I organize my Obsidian vault with PARA or Zettelkasten? most of my notes are research reading",
+    "should_trigger": true
+  },
+  {
+    "query": "en Obsidian cuando uso carpetas, cuando tags, cuando links y cuando properties? no me queda claro",
+    "should_trigger": true
+  },
+  {
+    "query": "quiero un flujo de daily notes en Obsidian que realmente alimente el vault y no se me acumule",
+    "should_trigger": true
+  },
+  {
+    "query": "which Obsidian plugins are actually worth installing? I keep hearing about Dataview and Templater",
+    "should_trigger": true
+  },
+  {
+    "query": "para llevar un registro de libros leidos en Obsidian, uso Bases o el plugin Dataview?",
+    "should_trigger": true
+  },
+  {
+    "query": "quiero conectar mi vault de Obsidian a Claude Code por MCP para que el agente lea y escriba notas, como lo estructuro?",
+    "should_trigger": true
+  },
+  {
+    "query": "estoy evaluando si paso mis notas de Notion a Obsidian o me quedo en Notion, que me conviene?",
+    "should_trigger": true
+  },
+  {
+    "query": "necesito plantillas de Obsidian para notas de reunion, de proyecto y de libro",
+    "should_trigger": true
+  },
+  {
+    "query": "one vault or several in Obsidian? I have personal, work and study notes mixed together",
+    "should_trigger": true
+  },
+  {
+    "query": "como se hace un Map of Content en Obsidian y cuando conviene en vez de una carpeta",
+    "should_trigger": true
+  },
+  {
+    "query": "cual es la sintaxis de un link en Markdown estandar, con corchetes y parentesis?",
+    "should_trigger": false
+  },
+  {
+    "query": "quiero construir un plugin de Obsidian que agregue un panel lateral con mis tareas",
+    "should_trigger": false
+  },
+  {
+    "query": "recomiendame una app de notas para el celular que sea rapida y simple",
+    "should_trigger": false
+  },
+  {
+    "query": "how do I set up Logseq for daily journaling?",
+    "should_trigger": false
+  },
+  {
+    "query": "necesito que un agente busque en mi vault openclaw las notas de infraestructura de la semana pasada",
+    "should_trigger": false
+  },
+  {
+    "query": "escribeme un script que convierta un export de Evernote a archivos Markdown",
+    "should_trigger": false
+  },
+  {
+    "query": "que es el metodo GTD de David Allen y como lo aplico en el trabajo?",
+    "should_trigger": false
+  },
+  {
+    "query": "como configuro Obsidian Sync para pagar lo menos posible entre laptop y telefono?",
+    "should_trigger": false
+  }
+]
