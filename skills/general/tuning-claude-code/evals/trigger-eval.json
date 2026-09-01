@@ -1,0 +1,82 @@
+[
+  {
+    "query": "quiero dejar bien configurado Claude Code en este repo, ahora mismo el .claude solo tiene un CLAUDE.md gigante y nada mas",
+    "should_trigger": true
+  },
+  {
+    "query": "Claude Code va lentisimo en este proyecto y siento que se confunde entre tantas herramientas, tengo como 12 MCP servers instalados",
+    "should_trigger": true
+  },
+  {
+    "query": "how should I structure my .claude/ directory? I want subagents for code review and a hook that runs prettier after edits",
+    "should_trigger": true
+  },
+  {
+    "query": "necesito bajar el consumo de tokens por turno del agente, creo que el CLAUDE.md y los MCP me estan comiendo el contexto",
+    "should_trigger": true
+  },
+  {
+    "query": "can you set up a custom subagent that only has read access and reviews my retrieval code before I open a PR?",
+    "should_trigger": true
+  },
+  {
+    "query": "quiero correr Claude Code en headless dentro de GitHub Actions para que corra los evals todas las noches y abra un PR si algo se rompe",
+    "should_trigger": true
+  },
+  {
+    "query": "explicame como usar git worktrees para tener varias sesiones de Claude Code en paralelo sin que se pisen",
+    "should_trigger": true
+  },
+  {
+    "query": "mi setup de Claude Code esta hecho un desastre, hazme una auditoria de .claude y .mcp.json y dime que sobra",
+    "should_trigger": true
+  },
+  {
+    "query": "quiero mejorar el cache hit rate del prompt, cada cambio chico invalida todo y se pone lento",
+    "should_trigger": true
+  },
+  {
+    "query": "add a PreToolUse hook that blocks git push to main and defers it for manual approval",
+    "should_trigger": true
+  },
+  {
+    "query": "genera un CLAUDE.md para este proyecto de Django, todavia no tiene ninguno",
+    "should_trigger": false
+  },
+  {
+    "query": "revisa el CLAUDE.md que ya existe, quedo desactualizado despues de migrar de Express a Fastify",
+    "should_trigger": false
+  },
+  {
+    "query": "quiero construir un MCP server que exponga la API interna de mi empresa a Claude",
+    "should_trigger": false
+  },
+  {
+    "query": "escribeme un GitHub Actions workflow que corra los tests de Jest en cada push",
+    "should_trigger": false
+  },
+  {
+    "query": "how do I add a git worktree so I can hotfix production while my feature branch stays checked out?",
+    "should_trigger": false
+  },
+  {
+    "query": "el agente se queda sin contexto cuando le pido refactors largos, como arreglo eso con compaction",
+    "should_trigger": false
+  },
+  {
+    "query": "necesito un pre-commit hook que corra eslint y prettier antes de cada commit",
+    "should_trigger": false
+  },
+  {
+    "query": "puedes optimizar la description de mi skill para que dispare mejor en los prompts correctos?",
+    "should_trigger": false
+  },
+  {
+    "query": "configura ESLint y Prettier en este proyecto TypeScript, no tenemos nada de linting",
+    "should_trigger": false
+  },
+  {
+    "query": "que modelo de Claude me conviene usar para generar codigo, opus o sonnet?",
+    "should_trigger": false
+  }
+]
